@@ -12,7 +12,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md overflow-hidden relative">
-        {/* Botón de cierre */}
         <button
           className="absolute top-4 right-4 p-2 text-gray-600 hover:text-gray-900"
           onClick={onClose}
@@ -20,7 +19,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <X size={20} />
         </button>
 
-        {/* Encabezado del modal */}
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold">Professional House Cleaning</h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -28,9 +26,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {/* Cuerpo del modal */}
         <div className="p-6">
-          {/* Información del proveedor */}
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
               <span className="text-lg font-semibold">SJ</span>
@@ -46,7 +42,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Detalles del servicio */}
           <div className="mt-6">
             <p className="text-sm text-gray-500">
               Comprehensive house cleaning service with eco-friendly products
@@ -58,7 +53,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Pie del modal */}
         <div className="p-6 border-t border-gray-200">
           <button
             className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"

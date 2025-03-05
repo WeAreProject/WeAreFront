@@ -5,7 +5,6 @@ import { ViewToggle } from "../components/ViewToggle";
 import { FilterSort } from "../components/FilterSort";
 import { CategoryCard } from "../components/CategoryCard";
 import Header from "../components/Header";
-// Definición de la interfaz Category
 export interface Category {
   id: string;
   title: string;
@@ -14,7 +13,6 @@ export interface Category {
   featured: boolean;
 }
 
-// Arreglo de categorías
 export const categories: Category[] = [
   {
     id: "1",

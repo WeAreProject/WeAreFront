@@ -1,3 +1,4 @@
+
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -6,6 +7,9 @@ import BusinessForm from './pages/BusinessForm';
 import BusinessContact from './pages/BusinessContact';
 import BusinessDetails from './pages/BusinessDetails';
 import BusinessVerification from './pages/BusinessVerification'; // Importa el nuevo componente
+
+
+import Categories from './pages/categories';
 
 function App() {
   const navigate = useNavigate();
@@ -41,6 +45,7 @@ function App() {
 
   return (
     <Routes>
+
       <Route path='/' element={<Home />} />
       <Route path='/Login' element={<Login />} />
       <Route path='/Register' element={<Register />} />
@@ -48,6 +53,9 @@ function App() {
       <Route path='/BusinessContact' element={<BusinessContact prevStep={prevStepContact} nextStep={nextStepDetails} />} />
       <Route path='/BusinessDetails' element={<BusinessDetails prevStep={prevStepDetails} nextStep={nextStepVerification} />} />
       <Route path='/BusinessVerification' element={<BusinessVerification prevStep={prevStepVerification} nextStep={nextStepHome} />} />
+¿
+      <Route path='/categories' element={<Categories/>}/>
+
     </Routes>
   );
 }

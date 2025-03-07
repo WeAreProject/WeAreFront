@@ -1,46 +1,124 @@
 import { useState } from "react";
+import { registerCustomer, registerOwner } from "../actions/register";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const [userId, setUserId] = useState(localStorage.getItem("userId"));
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: "",
+    full_name: "", 
+    name: "",     
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
-    role: "customer",
+    role: "customer", 
     termsAccepted: false,
+    image: null,
+    phone: "", 
   });
-
+  
+  const [image, setImage] = useState<File | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
+  const handleChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]:
+        type === "checkbox" ? checked : type === "file" ? files[0] : value,
     });
   };
-  
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
+  };
+
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
+    setError(null);
+    setLoading(true);
+  
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+  
+    const form = new FormData();
+  
+    const nameField = formData.role === "customer" ? "full_name" : "name";
+    const userId = localStorage.getItem("userId");
+
+    form.append(nameField, formData.full_name || formData.name); 
+    form.append("email", formData.email);
+    form.append("password", formData.password);
+    form.append("role", formData.role);
+    console.log("Datos del formulario antes de enviar:", formData);
+    if (userId) {
+      console.log("ID recuperado del localStorage:", userId);
+    }
+    if (formData.role === "businessOwner") {
+      form.append("phone", formData.phone); 
+    }
+    if (formData.role === "customer") {
+      form.append("username", formData.username);
+    }
+    if (image) form.append("image", image);
+  
+    try {
+      let response;
+      if (formData.role === "customer") {
+        response = await registerCustomer(form); 
+      } else if (formData.role === "businessOwner") {
+        response = await registerOwner(form);
+      }
+  
+      console.log("User registered:", response);
+   
+   if (response && response.id) {
+    localStorage.setItem("userId", response.id); 
+    setUserId(response.id); 
+  }
+  console.log(localStorage);
+
+      if (formData.role === "customer") {
+        navigate("/");
+      } else if (formData.role === "businessOwner") {
+        navigate("/ModalRegister"); 
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
   
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
       <div className="bg-white p-12 md:p-16 lg:p-20 rounded-3xl shadow-xl w-full max-w-3xl">
-        <h2 className="text-4xl font-bold text-center text-gray-900 mb-6">Create an account</h2>
-        <p className="text-gray-600 text-center mb-10 text-lg">Enter your information to get started</p>
+        <h2 className="text-4xl font-bold text-center text-gray-900 mb-6">
+          Create an account
+        </h2>
+        <p className="text-gray-600 text-center mb-10 text-lg">
+          Enter your information to get started
+        </p>
         <form onSubmit={handleSubmit} className="space-y-8">
           <div>
-            <label className="block text-gray-700 text-xl font-medium">Full Name</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Full Name
+            </label>
             <input
               type="text"
-              name="fullName"
-              value={formData.fullName}
+              name="full_name"
+              value={formData.full_name}
               onChange={handleChange}
               className="mt-2 w-full px-6 py-4 border rounded-xl text-gray-900 text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Enter your full name"
@@ -48,7 +126,9 @@ const Register = () => {
             />
           </div>
           <div>
-            <label className="block text-gray-700 text-xl font-medium">Email</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -59,20 +139,38 @@ const Register = () => {
               required
             />
           </div>
+          {formData.role === "customer" && (
+            <div>
+              <label className="block text-gray-700 text-xl font-medium">
+                Username
+              </label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="mt-2 w-full px-6 py-4 border rounded-xl text-gray-900 text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="Choose a username"
+                required
+              />
+            </div>
+          )}
           <div>
-            <label className="block text-gray-700 text-xl font-medium">Username</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Profile Picture
+            </label>
             <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
+              type="file"
+              name="image"
+              onChange={handleImageChange}
               className="mt-2 w-full px-6 py-4 border rounded-xl text-gray-900 text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Choose a username"
               required
             />
           </div>
           <div className="relative">
-            <label className="block text-gray-700 text-xl font-medium">Password</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Password
+            </label>
             <input
               type={showPassword ? "text" : "password"}
               name="password"
@@ -91,7 +189,9 @@ const Register = () => {
             </button>
           </div>
           <div className="relative">
-            <label className="block text-gray-700 text-xl font-medium">Confirm Password</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Confirm Password
+            </label>
             <input
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
@@ -110,7 +210,9 @@ const Register = () => {
             </button>
           </div>
           <div>
-            <label className="block text-gray-700 text-xl font-medium">Role</label>
+            <label className="block text-gray-700 text-xl font-medium">
+              Role
+            </label>
             <select
               name="role"
               value={formData.role}
@@ -121,6 +223,23 @@ const Register = () => {
               <option value="businessOwner">Business Owner</option>
             </select>
           </div>
+
+          {formData.role === "businessOwner" && (
+            <div>
+              <label className="block text-gray-700 text-xl font-medium">
+                Phone
+              </label>
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone || ""}
+                onChange={handleChange}
+                className="mt-2 w-full px-6 py-4 border rounded-xl text-gray-900 text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="Enter your phone number"
+                required
+              />
+            </div>
+          )}
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -131,18 +250,25 @@ const Register = () => {
               required
             />
             <label className="ml-3 text-gray-700 text-xl">
-              I accept the <a href="#" className="text-purple-600 hover:underline">terms and conditions</a>
+              I accept the{" "}
+              <a href="#" className="text-purple-600 hover:underline">
+                terms and conditions
+              </a>
             </label>
           </div>
           <button
             type="submit"
             className="w-full bg-purple-700 text-white py-5 rounded-xl text-2xl font-semibold hover:bg-purple-800 transition duration-200"
+            disabled={loading}
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
         <p className="text-center text-gray-700 text-xl mt-8">
-          Already have an account? <a href="#" className="text-purple-600 font-medium hover:underline">Log in</a>
+          Already have an account?{" "}
+          <a href="#" className="text-purple-600 font-medium hover:underline">
+            Log in
+          </a>
         </p>
       </div>
     </div>

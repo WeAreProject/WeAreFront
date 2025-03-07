@@ -7,27 +7,30 @@ const ProfileSettings = () => {
     <div className="min-h-screen bg-gray-100">
       <Header />
 
-      <div className="flex p-10">
+      <div className="flex flex-col lg:flex-row p-6 lg:p-10">
         <SettingsSidebar />
-        
-        <div className="flex-1 bg-white p-8 rounded-lg shadow-md mt-8">
+
+        {/* Contenido sin tarjeta */}
+        <div className="flex-1 p-4 lg:p-8 mt-8 lg:mt-0">
           {/* Foto de perfil y nombre */}
-          <div className="flex items-center space-x-4 mb-8">
+          <div className="flex flex-col lg:flex-row items-center space-x-0 lg:space-x-4 mb-8">
             <img
-              src="https://i.pinimg.com/736x/b1/6c/f3/b16cf30a73e39f9b8819bd9b61ff6b09.jpg" // URL de la imagen de perfil
+              src="https://i.pinimg.com/736x/b1/6c/f3/b16cf30a73e39f9b8819bd9b61ff6b09.jpg"
               alt="Profile"
-              className="w-24 h-24 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover mb-4 lg:mb-0"
             />
-            <div>
-              <h2 className="text-2xl font-semibold">John Doe</h2> {/* Nombre */}
-              <p className="text-gray-600">johndoe@example.com</p> {/* Correo electrónico */}
+            <div className="text-center lg:text-left">
+              <h2 className="text-2xl font-semibold">John Doe</h2>
+              <p className="text-gray-600">johndoe@example.com</p>
             </div>
           </div>
 
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
-          <p className="text-gray-600 mb-6">Manage your account settings and preferences.</p>
+          <p className="text-gray-600 mb-6">
+            Manage your account settings and preferences.
+          </p>
 
-          {/* Formulario */}
+          {/* Formulario sin tarjeta */}
           <div className="space-y-4">
             <input
               type="text"

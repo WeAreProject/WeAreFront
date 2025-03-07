@@ -7,7 +7,7 @@ const SupportSettings = () => {
     <div className="flex min-h-screen bg-gray-100 p-10">
       <Header />
       <SettingsSidebar />
-      <div className="flex-1 bg-white p-8 rounded-lg shadow-md mt-8">
+      <div className="flex-1 p-8 mt-8"> {/* Se eliminan las clases de borde y sombra */}
         <h2 className="text-2xl font-semibold mb-4">Support</h2>
         <p className="text-gray-600 mb-6">Manage your account settings and preferences.</p>
         

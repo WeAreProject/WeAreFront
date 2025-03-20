@@ -10,6 +10,13 @@ const Header = () => {
   // Función para verificar qué ruta está activa
   const isActive = (path: string) => location.pathname === path ? "bg-purple-600 text-white" : "hover:bg-gray-200";
 
+  const handleLogout = () => {
+    // Limpiar el localStorage
+    localStorage.clear();
+    // Redirigir al usuario a la página de login
+    navigate("/login");
+  };
+
   return (
     <header className="fixed top-0 left-0 w-full bg-white text-black p-4 z-50 shadow-md flex justify-between items-center">
       {/* Botón de Menú de Hamburguesa */}
@@ -75,7 +82,7 @@ const Header = () => {
             <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings")}`}>
               <Settings className="w-5 h-5" /> <span>Settings</span>
             </button>
-            <button  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 text-red-500 w-full text-left">
+            <button onClick={handleLogout} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 text-red-500 w-full text-left">
               <LogOut className="w-5 h-5" /> <span>Logout</span>
             </button>
           </div>

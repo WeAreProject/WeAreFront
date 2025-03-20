@@ -3,7 +3,6 @@ import { registerCustomer, registerOwner } from "../actions/register";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [userId, setUserId] = useState(localStorage.getItem("userId"));
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     full_name: "", 
@@ -24,12 +23,13 @@ const Register = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked, files } = target;
     setFormData({
       ...formData,
       [name]:
-        type === "checkbox" ? checked : type === "file" ? files[0] : value,
+        type === "checkbox" ? checked : type === "file" ? files?.[0] : value,
     });
   };
 
@@ -84,7 +84,6 @@ const Register = () => {
    
    if (response && response.id) {
     localStorage.setItem("userId", response.id); 
-    setUserId(response.id); 
   }
   console.log(localStorage);
 
@@ -94,7 +93,8 @@ const Register = () => {
         navigate("/ModalRegister"); 
       }
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err instanceof Error ? err.message : "An error occurred during registration";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -256,6 +256,7 @@ const Register = () => {
               </a>
             </label>
           </div>
+          {error && <p className="text-red-500 text-lg">{error}</p>}
           <button
             type="submit"
             className="w-full bg-purple-700 text-white py-5 rounded-xl text-2xl font-semibold hover:bg-purple-800 transition duration-200"

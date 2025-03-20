@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerBusiness } from "../actions/register";
 
-
-const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
-  const [formData, setFormData] = useState({
+const BusinessForm = ({ nextStep, formData, setFormData }: { 
+  nextStep: () => void;
+  formData: any;
+  setFormData: (data: any) => void;
+}) => {
+  const [localFormData, setLocalFormData] = useState({
     businessName: "",
     category: "",
     description: "",
@@ -17,10 +21,11 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
+    setLocalFormData({ ...localFormData, [name]: value });
     setFormData({ ...formData, [name]: value });
   };
 
-  const allFieldsFilled = Object.values(formData).every(value => value.trim() !== "");
+  const allFieldsFilled = Object.values(localFormData).every(value => value.trim() !== "");
   const progress = allFieldsFilled ? 25 : 0;
 
   return (
@@ -40,7 +45,7 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
             <input 
               type="text" 
               name="businessName" 
-              value={formData.businessName} 
+              value={localFormData.businessName} 
               onChange={handleChange}
               className="mt-2 w-full px-5 py-4 border border-gray-300 rounded-lg text-gray-900 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" 
               required 
@@ -51,7 +56,7 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
             <label className="block text-gray-800 font-semibold text-lg">Category</label>
             <select 
               name="category" 
-              value={formData.category} 
+              value={localFormData.category} 
               onChange={handleChange}
               className="mt-2 w-full px-5 py-4 border border-gray-300 rounded-lg text-gray-900 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" 
               required
@@ -67,7 +72,7 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
             <label className="block text-gray-800 font-semibold text-lg">Business Description</label>
             <textarea 
               name="description" 
-              value={formData.description} 
+              value={localFormData.description} 
               onChange={handleChange} 
               maxLength={500} 
               rows={5}
@@ -75,7 +80,7 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
               required 
             />
             <p className="text-right text-gray-500 text-sm">
-              {formData.description.length} / 500 characters
+              {localFormData.description.length} / 500 characters
             </p>
           </div>
 
@@ -93,8 +98,13 @@ const BusinessForm = ({ nextStep }: { nextStep: () => void }) => {
   );
 };
 
-const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextStep: () => void }) => {
-  const [formData, setFormData] = useState({
+const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: { 
+  prevStep: () => void; 
+  nextStep: () => void;
+  formData: any;
+  setFormData: (data: any) => void;
+}) => {
+  const [localFormData, setLocalFormData] = useState({
     email: "",
     phone: "",
     businessLogo: null as File | null,
@@ -105,9 +115,9 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-    const isValidPhone = /^(\d{3}-\d{3}-\d{2}-\d{2}|\d{10})$/.test(formData.phone);
-    const hasLogo = formData.businessLogo !== null;
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(localFormData.email);
+    const isValidPhone = /^(\d{3}-\d{3}-\d{2}-\d{2}|\d{10})$/.test(localFormData.phone);
+    const hasLogo = localFormData.businessLogo !== null;
 
     if (isValidEmail && isValidPhone && hasLogo) {
       setProgress(50);
@@ -116,21 +126,23 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
       setProgress(25);
       setIsComplete(false);
     }
-  }, [formData.email, formData.phone, formData.businessLogo]);
+  }, [localFormData.email, localFormData.phone, localFormData.businessLogo]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setLocalFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (file) {
-      setFormData({
-        ...formData,
+      setLocalFormData({
+        ...localFormData,
         businessLogo: file,
         previewLogo: URL.createObjectURL(file)
       });
+      setFormData((prev: any) => ({ ...prev, image: file }));
     }
   };
 
@@ -147,12 +159,12 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
         <form className="space-y-8">
           <div>
             <label className="block text-gray-700 font-semibold text-lg">Business Logo</label>
-            {formData.previewLogo ? (
+            {localFormData.previewLogo ? (
               <div className="mt-4 flex flex-col items-center">
-                <img src={formData.previewLogo} alt="Business Logo" className="w-40 h-40 object-cover rounded-xl shadow-lg" />
+                <img src={localFormData.previewLogo} alt="Business Logo" className="w-40 h-40 object-cover rounded-xl shadow-lg" />
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, businessLogo: null, previewLogo: "" })}
+                  onClick={() => setLocalFormData({ ...localFormData, businessLogo: null, previewLogo: "" })}
                   className="mt-3 text-red-500 text-sm hover:underline"
                 >
                   Remove image
@@ -176,7 +188,7 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
               <input
                 type="email"
                 name="email"
-                value={formData.email}
+                value={localFormData.email}
                 onChange={handleChange}
                 className="pl-12 w-full px-5 py-4 border rounded-xl text-gray-900 text-lg focus:ring-2 focus:ring-purple-500"
                 placeholder="Enter your email"
@@ -192,7 +204,7 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
               <input
                 type="tel"
                 name="phone"
-                value={formData.phone}
+                value={localFormData.phone}
                 onChange={handleChange}
                 className="pl-12 w-full px-5 py-4 border rounded-xl text-gray-900 text-lg focus:ring-2 focus:ring-purple-500"
                 placeholder="Enter your phone number"
@@ -227,9 +239,11 @@ const BusinessContact = ({ prevStep, nextStep }: { prevStep: () => void; nextSte
 interface BusinessDetailsProps {
     prevStep: () => void;
     nextStep: () => void;
+    formData: any;
+    setFormData: (data: any) => void;
   }
-const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
-  const [formData, setFormData] = useState({
+const BusinessDetails = ({ prevStep, nextStep, formData, setFormData }: BusinessDetailsProps) => {
+  const [localFormData, setLocalFormData] = useState({
     businessLocation: "",
     operatingHours: "",
     socialMediaLinks: "",
@@ -239,8 +253,8 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const hasBusinessLocation = formData.businessLocation.trim() !== "";
-    const hasOperatingHours = formData.operatingHours.trim() !== "";
+    const hasBusinessLocation = localFormData.businessLocation.trim() !== "";
+    const hasOperatingHours = localFormData.operatingHours.trim() !== "";
 
     if (hasBusinessLocation && hasOperatingHours) {
       setProgress(75);
@@ -249,11 +263,12 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
       setProgress(50);
       setIsComplete(false);
     }
-  }, [formData]);
+  }, [localFormData]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setLocalFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -278,7 +293,7 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
               <input
                 type="text"
                 name="businessLocation"
-                value={formData.businessLocation}
+                value={localFormData.businessLocation}
                 onChange={handleChange}
                 className="pl-14 w-full px-5 py-4 text-lg border rounded-xl text-gray-900 focus:ring-4 focus:ring-purple-500"
                 placeholder="Ej. Avenida Reforma 123, Ciudad de México"
@@ -295,7 +310,7 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
               <input
                 type="text"
                 name="operatingHours"
-                value={formData.operatingHours}
+                value={localFormData.operatingHours}
                 onChange={handleChange}
                 className="pl-14 w-full px-5 py-4 text-lg border rounded-xl text-gray-900 focus:ring-4 focus:ring-purple-500"
                 placeholder="Ej. Lunes a Viernes: 9:00 AM - 5:00 PM"
@@ -312,7 +327,7 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
               <input
                 type="text"
                 name="socialMediaLinks"
-                value={formData.socialMediaLinks}
+                value={localFormData.socialMediaLinks}
                 onChange={handleChange}
                 className="pl-14 w-full px-5 py-4 text-lg border rounded-xl text-gray-900 focus:ring-4 focus:ring-purple-500"
                 placeholder="Ej. https://facebook.com/tu-negocio"
@@ -349,10 +364,15 @@ const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
 };
 
 
-const BusinessVerification = ({ prevStep }: { prevStep: () => void; nextStep: () => void }) => {
-    const navigate = useNavigate(); // Hook para redirección
+const BusinessVerification = ({ prevStep, formData, setFormData }: { 
+  prevStep: () => void; 
+  formData: any;
+  setFormData: (data: any) => void;
+}) => {
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [localFormData, setLocalFormData] = useState({
     taxID: "",
     document: null as File | null,
     previewDocument: "",
@@ -362,9 +382,9 @@ const BusinessVerification = ({ prevStep }: { prevStep: () => void; nextStep: ()
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const isValidTaxID = formData.taxID.trim().length > 0;
-    const hasDocument = formData.document !== null;
-    const acceptedTerms = formData.termsAccepted;
+    const isValidTaxID = localFormData.taxID.trim().length > 0;
+    const hasDocument = localFormData.document !== null;
+    const acceptedTerms = localFormData.termsAccepted;
     
     if (isValidTaxID && hasDocument && acceptedTerms) {
       setProgress(100);
@@ -373,17 +393,56 @@ const BusinessVerification = ({ prevStep }: { prevStep: () => void; nextStep: ()
       setProgress(75);
       setIsComplete(false);
     }
-  }, [formData]);
+  }, [localFormData]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setLocalFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setFormData((prev: any) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (file) {
-      setFormData({ ...formData, document: file, previewDocument: URL.createObjectURL(file) });
+      setLocalFormData({ ...localFormData, document: file, previewDocument: URL.createObjectURL(file) });
+      setFormData((prev: any) => ({ ...prev, professional_license: file }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      const formDataToSend = new FormData();
+      const ownerId = localStorage.getItem("userId");
+
+      if (!ownerId) {
+        throw new Error("No se encontró el ID del propietario");
+      }
+
+      formDataToSend.append("owner_id", ownerId);
+      formDataToSend.append("business_name", formData.businessName);
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("location", formData.businessLocation);
+      formDataToSend.append("operation_hours", formData.operatingHours);
+      formDataToSend.append("social_media_links", formData.socialMediaLinks);
+      formDataToSend.append("tax_id", localFormData.taxID);
+      
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
+      
+      if (formData.professional_license) {
+        formDataToSend.append("professional_license", formData.professional_license);
+      }
+
+      await registerBusiness(formDataToSend);
+      navigate("/");
+    } catch (error) {
+      console.error("Error al registrar el negocio:", error);
+      setIsLoading(false);
     }
   };
 
@@ -405,22 +464,22 @@ const BusinessVerification = ({ prevStep }: { prevStep: () => void; nextStep: ()
             <input 
               type="text" 
               name="taxID" 
-              value={formData.taxID} 
+              value={localFormData.taxID} 
               onChange={handleChange} 
               className="w-full px-5 py-4 border rounded-lg text-gray-900 focus:ring-2 focus:ring-purple-500 text-xl" 
               placeholder="Enter your tax ID" 
               required 
             />
-            {!formData.taxID && <p className="text-red-500 text-sm mt-2">Tax ID is required</p>}
+            {!localFormData.taxID && <p className="text-red-500 text-sm mt-2">Tax ID is required</p>}
           </div>
 
           {/* Document Upload */}
           <div>
             <label className="block text-xl font-medium text-gray-700">Professional License/Certification</label>
-            {formData.previewDocument ? (
+            {localFormData.previewDocument ? (
               <div className="mt-4 flex flex-col items-center">
-                <embed src={formData.previewDocument} className="w-full h-48 object-cover rounded-lg shadow" />
-                <button type="button" onClick={() => setFormData({ ...formData, document: null, previewDocument: "" })} className="mt-2 text-red-500 text-sm hover:underline">
+                <embed src={localFormData.previewDocument} className="w-full h-48 object-cover rounded-lg shadow" />
+                <button type="button" onClick={() => setLocalFormData({ ...localFormData, document: null, previewDocument: "" })} className="mt-2 text-red-500 text-sm hover:underline">
                   Remove document
                 </button>
               </div>
@@ -437,46 +496,85 @@ const BusinessVerification = ({ prevStep }: { prevStep: () => void; nextStep: ()
 
           {/* Terms and Conditions */}
           <div className="flex items-start">
-            <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleChange} className="w-6 h-6 mt-1" />
+            <input type="checkbox" name="termsAccepted" checked={localFormData.termsAccepted} onChange={handleChange} className="w-6 h-6 mt-1" />
             <label className="ml-4 text-lg text-gray-700">I agree to the terms and conditions</label>
           </div>
-          {!formData.termsAccepted && <p className="text-red-500 text-sm mt-2">You must accept the terms and conditions</p>}
+          {!localFormData.termsAccepted && <p className="text-red-500 text-sm mt-2">You must accept the terms and conditions</p>}
 
           {/* Buttons */}
           <div className="flex justify-between mt-8">
-            <button type="button" onClick={prevStep} className="bg-gray-500 text-white py-4 px-8 rounded-lg font-semibold hover:bg-gray-600 transition w-full sm:w-auto">
+            <button 
+              type="button" 
+              onClick={prevStep} 
+              className="bg-gray-500 text-white py-4 px-8 rounded-lg font-semibold hover:bg-gray-600 transition w-full sm:w-auto"
+              disabled={isLoading}
+            >
               Previous
             </button>
             <button 
               type="button" 
-              onClick={isComplete ? () => navigate("/") : undefined} 
-              className={`py-4 px-8 rounded-lg font-semibold transition w-full sm:w-auto 
-                ${isComplete ? "bg-purple-700 text-white hover:bg-purple-800" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`} 
-              disabled={!isComplete}
+              onClick={isComplete ? handleSubmit : undefined} 
+              className={`py-4 px-8 rounded-lg font-semibold transition w-full sm:w-auto relative
+                ${isComplete && !isLoading
+                  ? "bg-purple-700 text-white hover:bg-purple-800"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"}`} 
+              disabled={!isComplete || isLoading}
             >
-              Submit & Verify
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span>Registrando...</span>
+                </div>
+              ) : (
+                "Submit & Verify"
+              )}
             </button>
           </div>
         </form>
+
+        {/* Overlay de carga */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Registrando tu negocio</h3>
+                <p className="text-gray-600 text-center">Por favor, espera mientras procesamos tu registro...</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-
-
 const ModalRegister = () => {
   const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    businessName: "",
+    category: "",
+    description: "",
+    email: "",
+    phone: "",
+    businessLocation: "",
+    operatingHours: "",
+    socialMediaLinks: "",
+    taxID: "",
+    image: null,
+    professional_license: null,
+    termsAccepted: false
+  });
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
   return (
     <div>
-      {step === 1 && <BusinessForm nextStep={nextStep} />}
-      {step === 2 && <BusinessContact prevStep={prevStep} nextStep={nextStep} />}
-      {step === 3 && <BusinessDetails prevStep={prevStep} nextStep={nextStep} />}
-      {step === 4 && <BusinessVerification prevStep={prevStep} nextStep={nextStep} />}
+      {step === 1 && <BusinessForm nextStep={nextStep} formData={formData} setFormData={setFormData} />}
+      {step === 2 && <BusinessContact prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
+      {step === 3 && <BusinessDetails prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
+      {step === 4 && <BusinessVerification prevStep={prevStep} formData={formData} setFormData={setFormData} />}
     </div>
   );
 };

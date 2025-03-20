@@ -49,3 +49,26 @@ export const registerOwner = async (formData: FormData) => {
     }
   };
   
+export const registerBusiness = async (formData: FormData) => {
+  try {
+    const response = await fetch(
+      "https://rest-api-weare-production.up.railway.app/api/businesses/register",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Business registration failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error registering business:", error);
+    throw error;
+  }
+};
+  

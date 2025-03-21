@@ -5,6 +5,8 @@ import Register from './pages/Register';
 import ModalRegister from './components/modalRegister'; // Importa el componente ModalRegister
 import Categories from './pages/categories';
 
+import Negocio from './pages/Negocio';
+
 function App() {
   return (
     <Routes>
@@ -13,6 +15,7 @@ function App() {
       <Route path='/Register' element={<Register />} />
       <Route path='/ModalRegister' element={<ModalRegister />} /> {/* Ruta para ModalRegister */}
       <Route path='/categories' element={<Categories />} />
+      <Route path="/Negocio" element={<Negocio />} />
     </Routes>
   );
 }

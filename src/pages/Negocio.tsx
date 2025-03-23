@@ -1,48 +1,69 @@
-import { useState } from "react";
+// pages/Negocio.tsx
+
+import { useState, useEffect } from 'react';
+import { fetchBusinessData } from '../actions/business';  // Importar la función de acción
 import ServiceModal from "../components/ServiceModal";
 
 const Negocio = () => {
+  const [business, setBusiness] = useState<any | null>(null); // Aquí almacenamos la información de negocio
   const [selectedService, setSelectedService] = useState<number | null>(null);
+
+  // Servicios de ejemplo
   const services = [
     { name: "Web Development", price: "$75/hr", image: "/images/web-development.jpg" },
     { name: "Mobile Development", price: "$85/hr", image: "/images/mobile-development.jpg" },
     { name: "SEO Optimization", price: "$95/hr", image: "/images/seo-optimization.jpg" }
   ];
 
+  useEffect(() => {
+    const getBusinessData = async () => {
+      const getUserId = () => {
+        // Aquí deberías obtener el ID del usuario logueado, puede ser desde el contexto, un token, etc.
+        return 4;  // Cambia esto por la forma real de obtener el ID del usuario logueado
+      };
+
+      const userId = getUserId();
+      const data = await fetchBusinessData(userId);  // Llamada a la API con el userId
+      setBusiness(data);  // Actualizar el estado con los datos de negocio
+    };
+    
+    getBusinessData();
+  }, []);  // El array vacío asegura que solo se ejecute una vez cuando el componente se monte.
+
+  if (!business) {
+    return <div>Cargando...</div>; // Muestra un mensaje de carga mientras los datos están siendo obtenidos
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6 md:p-12 lg:p-16">
       {/* Main Content */}
       <main className="max-w-5xl mx-auto bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-xl shadow-lg">
-        {/* Image Placeholder */}
+        {/* Imagen del negocio */}
         <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gray-300 flex items-center justify-center rounded-lg mb-6">
-          <span className="text-gray-600 text-lg sm:text-xl">Image</span>
+          <img src={business.image} alt={business.business_name} className="w-full h-full object-cover rounded-lg" />
         </div>
 
-        {/* Description */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">Professional Photography Session</h2>
+        {/* Descripción */}
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{business.business_name}</h2>
         <p className="text-gray-700 mt-4 text-base sm:text-lg">
-          Capture your special moments with our professional photography session. Our
-          experienced photographers will provide high-quality images that you will
-          cherish for a lifetime.
+          {business.description}
         </p>
 
-        {/* Key Benefits */}
+        {/* Beneficios clave */}
         <ul className="list-disc ml-6 sm:ml-8 mt-4 text-gray-600 text-base sm:text-lg space-y-2">
           <li>High-resolution images</li>
           <li>Customizable sessions</li>
           <li>Professional equipment</li>
         </ul>
 
-        {/* Customer Reviews */}
+        {/* Reseñas de clientes */}
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-2">Customer Reviews</h3>
           <div className="text-yellow-500">★★★★★</div>
           <p className="text-gray-600 text-sm">Absolutely amazing experience! The pictures turned out beautifully.</p>
-          <div className="text-yellow-500 mt-2">★★★★☆</div>
-          <p className="text-gray-600 text-sm">Great service, very professional. Highly recommended.</p>
         </div>
 
-        {/* Buttons */}
+        {/* Botones */}
         <div className="mt-6">
           <button className="bg-green-500 hover:bg-green-600 text-white text-base sm:text-lg font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-md transition-all">
             WhatsApp
@@ -50,7 +71,7 @@ const Negocio = () => {
         </div>
       </main>
 
-      {/* Services */}
+      {/* Servicios */}
       <section className="max-w-5xl mx-auto mt-10">
         <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6">Services</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -80,7 +101,7 @@ const Negocio = () => {
         </div>
       </section>
 
-      {/* Location */}
+      {/* Ubicación */}
       <section className="max-w-5xl mx-auto mt-10 p-6 sm:p-8 bg-white rounded-xl shadow-lg">
         <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6">Location</h3>
         <div className="w-full h-40 sm:h-56 md:h-72 bg-gray-300 flex items-center justify-center rounded-lg">

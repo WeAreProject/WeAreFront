@@ -24,3 +24,4 @@ export const fetchBusinessData = async (userId: number) => {
     }
   };
   
+  

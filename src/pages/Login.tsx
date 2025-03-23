@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { loginUser } from "../actions/login";
+import { useNavigate } from "react-router-dom";
 import "../index.css";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,26 +22,42 @@ const Login = () => {
     return password.length >= 6;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let valid = true;
+    setLoginError("");
 
     if (!validateEmail(email)) {
-      setEmailError("Invalid email format");
+      setEmailError("Formato de email inválido");
       valid = false;
     } else {
       setEmailError("");
     }
 
     if (!validatePassword(password)) {
-      setPasswordError("Password must be at least 6 characters");
+      setPasswordError("La contraseña debe tener al menos 6 caracteres");
       valid = false;
     } else {
       setPasswordError("");
     }
 
     if (valid) {
-      console.log("Email:", email, "Password:", password);
+      setIsLoading(true);
+      try {
+        const response = await loginUser({ email, password });
+        
+        // Si llegamos aquí, significa que el login fue exitoso
+        if (response.message === "Login successful") {
+          // Redirigimos a la página principal
+          navigate('/');
+        } else {
+          setLoginError("Error inesperado en el inicio de sesión");
+        }
+      } catch (error: any) {
+        setLoginError(error.message || "Error al iniciar sesión. Por favor, verifica tus credenciales.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -98,11 +119,17 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-purple-700 text-white py-5 rounded-xl text-2xl font-semibold hover:bg-purple-800 transition duration-200"
+            className={`w-full bg-purple-700 text-white py-5 rounded-xl text-2xl font-semibold hover:bg-purple-800 transition duration-200 ${
+              isLoading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+            disabled={isLoading}
           >
-            Sign in
+            {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>
         </form>
+        {loginError && (
+          <p className="text-red-500 text-lg mt-4 text-center">{loginError}</p>
+        )}
         <p className="text-center text-gray-700 text-xl mt-8">
           Don't have an account? {" "}
           <a href="#" className="text-purple-600 font-medium hover:underline">

@@ -1,53 +1,37 @@
-import { Heart, Home, Star, Car, Grid} from "lucide-react";
-import React, { useState } from "react";
+import { Heart, Home, Star, Car, Grid } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import "../index.css";
 import Header from "../components/Header";
 import Modal from "../components/Modal";
 import { SearchBar } from "../components/SearchBar";
-const featuredServices = [
-  {
-    id: 1,
-    title: "Premium Cleaning Service",
-    provider: {
-      name: "CleanCo",
-      image:
-        "https://res.cloudinary.com/dxh55fgry/image/upload/v1739424339/samples/outdoor-woman.jpg", // Aquí va la URL de la imagen
-      rating: 4.8,
-      reviews: 150,
-    },
-    description: "High-quality cleaning service for homes and offices.",
-    price: "$100",
-    availability: "Available Now",
-  },
-  {
-    id: 2,
-    title: "Premium Cleaning Service",
-    provider: {
-      name: "CleanCo",
-      image:
-        "https://res.cloudinary.com/dxh55fgry/image/upload/v1739424339/samples/outdoor-woman.jpg", // Aquí va la URL de la imagen
-      rating: 4.8,
-      reviews: 150,
-    },
-    description: "Professional repair for all types of cars.",
-    price: "$200",
-    availability: "Available Soon",
-  },
-  {
-    id: 3,
-    title: "Premium Cleaning Service",
-    provider: {
-      name: "CleanCo",
-      image:
-        "https://res.cloudinary.com/dxh55fgry/image/upload/v1739424339/samples/outdoor-woman.jpg", // Aquí va la URL de la imagen
-      rating: 4.8,
-      reviews: 150,
-    },
-    description: "Professional repair for all types of cars.",
-    price: "$200",
-    availability: "Available Soon",
-  },
-];
+import { getServices, getBusinessById } from "../actions/services";
+
+interface Service {
+  id: number;
+  business_id: number;
+  service_name: string;
+  category: string;
+  price: string;
+  description: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Business {
+  id: number;
+  business_name: string;
+  image: string;
+}
+
+interface ServiceWithBusiness extends Service {
+  provider: {
+    name: string;
+    image: string;
+    rating: number;
+    reviews: number;
+  };
+}
 
 const categories = [
   { icon: Heart, name: "Healthcare", services: "245 services" },
@@ -57,19 +41,84 @@ const categories = [
   { icon: Heart, name: "Maintenance", services: "167 services" },
   { icon: Grid, name: "Others", services: "243 services" },
 ];
+
 const HomePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceWithBusiness | null>(null);
+  const [services, setServices] = useState<ServiceWithBusiness[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const servicesData = await getServices();
+        
+        // Obtener información de los negocios para cada servicio
+        const servicesWithBusiness = await Promise.all(
+          servicesData.map(async (service) => {
+            const business = await getBusinessById(service.business_id);
+            return {
+              ...service,
+              provider: {
+                name: business.business_name,
+                image: business.image,
+                rating: 4.8, // Valores por defecto ya que no vienen en la API
+                reviews: 150,
+              },
+            };
+          })
+        );
+
+        setServices(servicesWithBusiness);
+      } catch (err) {
+        setError("Error al cargar los servicios");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  const handleOpenModal = (service: ServiceWithBusiness) => {
+    setSelectedService(service);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedService(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Cargando servicios...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full max-w-7xl mx-auto px-4 py-8 space-y-12 pt-16">
-       <Header />
+      <Header />
       <section className="text-center space-y-6">
         <h1 className="text-4xl font-bold">Find Your Perfect Service</h1>
         <p className="text-muted-foreground text-lg">
           Connect with trusted professionals for all your service needs
         </p>
         <div className="max-w-2xl mx-auto">
-    <SearchBar/>
+          <SearchBar />
         </div>
       </section>
 
@@ -96,17 +145,17 @@ const HomePage: React.FC = () => {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-semibold">Featured Services</h2>
+        <h2 className="text-2xl font-semibold">Services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredServices.map((service) => (
+          {services.map((service) => (
             <div
               key={service.id}
               className="service-card bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300"
             >
               <div className="relative h-40 w-full rounded-t-xl overflow-hidden">
                 <img
-                  src={service.provider.image}
-                  alt={service.title}
+                  src={service.image}
+                  alt={service.service_name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -125,31 +174,38 @@ const HomePage: React.FC = () => {
                     <div className="flex items-center text-sm text-gray-500">
                       <Star className="w-4 h-4 text-yellow-400 ml-1" />
                       <span>
-                        {service.provider?.rating} ({service.provider?.reviews})
+                        {service.provider.rating} ({service.provider.reviews})
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-lg">{service.title}</h3>
+                  <h3 className="font-semibold text-lg">{service.service_name}</h3>
                   <p className="text-sm text-gray-500">{service.description}</p>
                 </div>
 
                 <div className="flex items-center justify-between text-sm font-medium">
-                  <span>{service.price}</span>
-                  <span className="text-green-600">{service.availability}</span>
+                  <span>${service.price}</span>
                 </div>
 
-                <button className="w-full py-2 text-center bg-purple-200 text-purple-700 font-semibold rounded-lg hover:bg-purple-300 transition"  onClick={() => setIsModalOpen(true)}>
+                <button 
+                  className="w-full py-2 text-center bg-purple-200 text-purple-700 font-semibold rounded-lg hover:bg-purple-300 transition"
+                  onClick={() => handleOpenModal(service)}
+                >
                   View Details
                 </button>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal}
+        service={selectedService}
+      />
     </div>
   );
 };

@@ -1,13 +1,41 @@
 import React from "react";
 import { X } from "lucide-react";
 
+interface Service {
+  id: number;
+  business_id: number;
+  service_name: string;
+  category: string;
+  price: string;
+  description: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Business {
+  id: number;
+  business_name: string;
+  image: string;
+}
+
+interface ServiceWithBusiness extends Service {
+  provider: {
+    name: string;
+    image: string;
+    rating: number;
+    reviews: number;
+  };
+}
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  service: ServiceWithBusiness | null;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
+  if (!isOpen || !service) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -20,35 +48,38 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </button>
 
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold">Professional House Cleaning</h2>
+          <h2 className="text-xl font-semibold">{service.service_name}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Comprehensive house cleaning service with eco-friendly products
+            {service.description}
           </p>
         </div>
 
         <div className="p-6">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-lg font-semibold">SJ</span>
+            <div className="w-12 h-12 rounded-full overflow-hidden border">
+              <img
+                src={service.provider.image}
+                alt={service.provider.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
-              <p className="font-semibold">Sarah Johnson</p>
+              <p className="font-semibold">{service.provider.name}</p>
               <div className="flex items-center text-sm text-gray-500">
-                <span>4.8</span>
+                <span>{service.provider.rating}</span>
                 <span className="mx-1">•</span>
-                <span>127 reviews</span>
+                <span>{service.provider.reviews} reviews</span>
               </div>
-              <p className="text-sm text-gray-500">Brooklyn, NY</p>
+              <p className="text-sm text-gray-500">{service.category}</p>
             </div>
           </div>
 
           <div className="mt-6">
             <p className="text-sm text-gray-500">
-              Comprehensive house cleaning service with eco-friendly products
+              {service.description}
             </p>
             <div className="mt-4 flex items-center justify-between">
-              <p className="text-lg font-semibold">$80 - $120</p>
-              <p className="text-sm text-green-600">Available Today</p>
+              <p className="text-lg font-semibold">${service.price}</p>
             </div>
           </div>
         </div>

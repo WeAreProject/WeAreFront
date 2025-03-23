@@ -1,5 +1,3 @@
-// pages/Negocio.tsx
-
 import { useState, useEffect } from 'react';
 import { fetchBusinessData } from '../actions/business';  // Importar la función de acción
 import ServiceModal from "../components/ServiceModal";
@@ -8,7 +6,7 @@ const Negocio = () => {
   const [business, setBusiness] = useState<any | null>(null); // Aquí almacenamos la información de negocio
   const [selectedService, setSelectedService] = useState<number | null>(null);
 
-  // Servicios de ejemplo
+  // Servicios de ejemplo (puedes sustituir por datos dinámicos si los tienes)
   const services = [
     { name: "Web Development", price: "$75/hr", image: "/images/web-development.jpg" },
     { name: "Mobile Development", price: "$85/hr", image: "/images/mobile-development.jpg" },
@@ -17,16 +15,20 @@ const Negocio = () => {
 
   useEffect(() => {
     const getBusinessData = async () => {
-      const getUserId = () => {
-        // Aquí deberías obtener el ID del usuario logueado, puede ser desde el contexto, un token, etc.
-        return 4;  // Cambia esto por la forma real de obtener el ID del usuario logueado
-      };
+      // Obtener el ID del usuario logueado desde el localStorage
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        console.error("No user data found");
+        return;
+      }
 
-      const userId = getUserId();
-      const data = await fetchBusinessData(userId);  // Llamada a la API con el userId
+      const { id } = JSON.parse(userData); // Obtener el ID del usuario desde el JSON almacenado
+
+      // Llamar a la función para obtener los datos del negocio
+      const data = await fetchBusinessData(id);  // Usamos el ID del usuario para obtener los datos del negocio
       setBusiness(data);  // Actualizar el estado con los datos de negocio
     };
-    
+
     getBusinessData();
   }, []);  // El array vacío asegura que solo se ejecute una vez cuando el componente se monte.
 
@@ -48,13 +50,25 @@ const Negocio = () => {
         <p className="text-gray-700 mt-4 text-base sm:text-lg">
           {business.description}
         </p>
+        {/* Email */}
 
-        {/* Beneficios clave */}
-        <ul className="list-disc ml-6 sm:ml-8 mt-4 text-gray-600 text-base sm:text-lg space-y-2">
-          <li>High-resolution images</li>
-          <li>Customizable sessions</li>
-          <li>Professional equipment</li>
-        </ul>
+        <p className="text-gray-700 mt-4 text-base sm:text-lg">
+          {business.location}
+        </p>
+
+        <p className="text-gray-700 mt-4 text-base sm:text-lg">
+          {business.phone}
+        </p>
+
+        <p className="text-gray-700 mt-4 text-base sm:text-lg">
+          {business.email}
+        </p>
+        
+        <p className="text-gray-700 mt-4 text-base sm:text-lg">
+          {business.operation_hours}
+        </p>
+
+        
 
         {/* Reseñas de clientes */}
         <div className="bg-white p-4 rounded-lg shadow-md">

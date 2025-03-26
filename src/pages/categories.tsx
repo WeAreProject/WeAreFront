@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { SearchBar } from "../components/SearchBar";
 import { ViewToggle } from "../components/ViewToggle";
 import { FilterSort } from "../components/FilterSort";
 import { CategoryCard } from "../components/CategoryCard";
 import Header from "../components/Header";
+import { getCategories } from "../actions/categories";
+
 export interface Category {
   id: string;
   title: string;
@@ -13,52 +15,50 @@ export interface Category {
   featured: boolean;
 }
 
-export const categories: Category[] = [
-  {
-    id: "1",
-    title: "Home Services",
-    description: "Professional home maintenance and improvement services",
-    icon: "home",
-    featured: true,
-  },
-  {
-    id: "2",
-    title: "Beauty & Wellness",
-    description: "Personal care and wellness services",
-    icon: "heart",
-    featured: true,
-  },
-  {
-    id: "3",
-    title: "Business & Tech",
-    description: "Professional business and technology solutions",
-    icon: "briefcase",
-    featured: true,
-  },
-  {
-    id: "4",
-    title: "Repairs",
-    description: "Expert repair services for various items",
-    icon: "tools",
-    featured: false,
-  },
-  {
-    id: "5",
-    title: "Events",
-    description: "Professional event planning and management",
-    icon: "calendar",
-    featured: false,
-  },
-];
-
 const Categories = () => {
   const [isGrid, setIsGrid] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (err) {
+        setError("Error al cargar las categorías");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const featuredCategories = categories.filter((cat) => cat.featured);
   const regularCategories = categories.filter((cat) => !cat.featured);
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-xl">Cargando categorías...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-xl text-red-500">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 space-y-12 pt-16 to-gray-100">
-        <Header/>
+      <Header/>
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <motion.h1

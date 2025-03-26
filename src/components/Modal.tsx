@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { X } from "lucide-react";
 
 interface Service {
@@ -49,9 +49,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
 
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold">{service.service_name}</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {service.description}
-          </p>
+     
         </div>
 
         <div className="p-6">

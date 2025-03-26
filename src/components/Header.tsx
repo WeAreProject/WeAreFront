@@ -79,6 +79,11 @@ const Header = () => {
             <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/light-mode")}`}>
               <Sun className="w-5 h-5" /> <span>Light Mode</span>
             </button>
+            <button 
+              onClick={() => navigate("/settings/profile")} 
+              className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings/profile")}`}>
+              <Settings className="w-5 h-5" /> <span>Settings</span>
+            </button>
             <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings")}`}>
               <Settings className="w-5 h-5" /> <span>Settings</span>
             </button>

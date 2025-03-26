@@ -10,15 +10,21 @@ const Header = () => {
   // Función para verificar qué ruta está activa
   const isActive = (path: string) => location.pathname === path ? "bg-purple-600 text-white" : "hover:bg-gray-200";
 
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+
   const handleLogout = () => {
     // Limpiar el localStorage
     localStorage.clear();
     // Redirigir al usuario a la página de login
     navigate("/login");
+    setIsOpen(false);
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white text-black p-4 z-50 shadow-md flex justify-between items-center">
+    <header className="fixed top-0 left-0 w-full bg-white text-black h-16 z-50 shadow-sm flex justify-between items-center px-4">
       {/* Botón de Menú de Hamburguesa */}
       <button onClick={() => setIsOpen(!isOpen)} className="focus:outline-none">
         <Menu className="w-6 h-6" />
@@ -42,19 +48,19 @@ const Header = () => {
           {/* Sección: Principal */}
           <div className="mb-auto">
             <p className="text-gray-500 uppercase text-sm font-semibold mb-2">Main Menu</p>
-            <button onClick={() => navigate("/")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/")}`}>
+            <button onClick={() => handleNavigation("/")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/")}`}>
               <Home className="w-5 h-5" /> <span>Home</span>
             </button>
-            <button onClick={() => navigate("/categories")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/categories")}`}>
+            <button onClick={() => handleNavigation("/categories")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/categories")}`}>
               <Grid className="w-5 h-5" /> <span>Categories</span>
             </button>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/purchases")}`}>
+            <button onClick={() => handleNavigation("/purchases")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/purchases")}`}>
               <ShoppingBag className="w-5 h-5" /> <span>My purchases</span>
             </button>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
+            <button onClick={() => handleNavigation("/payment")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
               <CreditCard className="w-5 h-5" /> <span>Payment Methods</span>
             </button>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
+            <button onClick={() => handleNavigation("/refer")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
               <Users className="w-5 h-5" /> <span>Refer</span>
             </button>
           </div>
@@ -62,13 +68,13 @@ const Header = () => {
           {/* Sección: Servicios */}
           <div className="mb-auto">
             <p className="text-gray-500 uppercase text-sm font-semibold mb-2">My Services</p>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/services")}`}>
+            <button onClick={() => handleNavigation("/MyServices")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/MyServices")}`}>
               <Briefcase className="w-5 h-5" /> <span>My Services</span>
             </button>
-            <button className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/dashboard")}`}>
+            <button onClick={() => handleNavigation("/dashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/dashboard")}`}>
               <LayoutDashboard className="w-5 h-5" /> <span>Service Dashboard</span>
             </button>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>
+            <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>
               <Megaphone className="w-5 h-5" /> <span>Ads & Promotions</span>
             </button>
           </div>
@@ -76,10 +82,10 @@ const Header = () => {
           {/* Sección: Configuración al final */}
           <div className="mt-auto">
             <p className="text-gray-500 uppercase text-sm font-semibold mb-2">Settings</p>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/light-mode")}`}>
+            <button onClick={() => handleNavigation("/light-mode")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/light-mode")}`}>
               <Sun className="w-5 h-5" /> <span>Light Mode</span>
             </button>
-            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings")}`}>
+            <button onClick={() => handleNavigation("/settings")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings")}`}>
               <Settings className="w-5 h-5" /> <span>Settings</span>
             </button>
             <button onClick={handleLogout} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 text-red-500 w-full text-left">

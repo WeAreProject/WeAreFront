@@ -7,7 +7,6 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Función para verificar qué ruta está activa
   const isActive = (path: string) => location.pathname === path ? "bg-purple-600 text-white" : "hover:bg-gray-200";
 
   const handleNavigation = (path: string) => {
@@ -57,10 +56,10 @@ const Header = () => {
             <button onClick={() => handleNavigation("/purchases")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/purchases")}`}>
               <ShoppingBag className="w-5 h-5" /> <span>My purchases</span>
             </button>
-            <button onClick={() => handleNavigation("/payment")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
+            <button onClick={() => handleNavigation("")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
               <CreditCard className="w-5 h-5" /> <span>Payment Methods</span>
             </button>
-            <button onClick={() => handleNavigation("/refer")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
+            <button onClick={() => handleNavigation("")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
               <Users className="w-5 h-5" /> <span>Refer</span>
             </button>
           </div>
@@ -71,7 +70,7 @@ const Header = () => {
             <button onClick={() => handleNavigation("/MyServices")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/MyServices")}`}>
               <Briefcase className="w-5 h-5" /> <span>My Services</span>
             </button>
-            <button onClick={() => handleNavigation("/dashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/dashboard")}`}>
+            <button onClick={() => handleNavigation("/ServiceDashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/dashboard")}`}>
               <LayoutDashboard className="w-5 h-5" /> <span>Service Dashboard</span>
             </button>
             <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>

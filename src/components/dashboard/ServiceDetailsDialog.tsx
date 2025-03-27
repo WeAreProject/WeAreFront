@@ -1,4 +1,14 @@
-import { QrCode, Star, Upload } from "lucide-react";
+import { QrCode, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface Customer {
+  id: number;
+  full_name: string;
+  email: string;
+  username: string;
+  image: string;
+  created_at: string;
+}
 
 interface Service {
   id: string;
@@ -13,6 +23,7 @@ interface Service {
   status: "pending" | "ongoing" | "completed" | "canceled";
   payment: "paid" | "pending" | "refunded";
   earnings?: number;
+  customer_id: number;
 }
 
 interface ServiceDetailsDialogProps {
@@ -21,18 +32,36 @@ interface ServiceDetailsDialogProps {
 }
 
 const ServiceDetailsDialog = ({ service, onClose }: ServiceDetailsDialogProps) => {
+  const [customer, setCustomer] = useState<Customer | null>(null);
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      if (!service?.customer_id) return;
+      try {
+        const response = await fetch(`https://rest-api-weare-production.up.railway.app/api/customers/${service.customer_id}`);
+        if (!response.ok) throw new Error('Error fetching customer');
+        const data = await response.json();
+        setCustomer(data);
+      } catch (error) {
+        console.error('Error fetching customer:', error);
+      }
+    };
+
+    fetchCustomer();
+  }, [service?.customer_id]);
+
   if (!service) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-        <h2 className="text-xl font-semibold mb-4">Service Details</h2>
+        <h2 className="text-xl font-semibold mb-4">Detalles del Servicio</h2>
         <div className="grid gap-6">
           <div className="flex items-center space-x-4">
             <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
               <img
-                src={service.client.avatar}
-                alt={service.client.name}
+                src={customer?.image || "https://via.placeholder.com/150"}
+                alt={customer?.full_name || "Cliente"}
                 className="h-full w-full object-cover"
               />
             </div>
@@ -51,41 +80,39 @@ const ServiceDetailsDialog = ({ service, onClose }: ServiceDetailsDialogProps) =
           </div>
 
           <div>
-            <h4 className="text-sm font-medium mb-2">Client Information</h4>
-            <p className="text-sm"><span className="font-medium">Name:</span> {service.client.name}</p>
-            <p className="text-sm"><span className="font-medium">Scheduled:</span> {service.date} at {service.time}</p>
+            <h4 className="text-sm font-medium mb-2">Información del Cliente</h4>
+            <p className="text-sm"><span className="font-medium">Nombre:</span> {customer?.full_name || "Cargando..."}</p>
+            <p className="text-sm"><span className="font-medium">Email:</span> {customer?.email || "Cargando..."}</p>
+            <p className="text-sm"><span className="font-medium">Usuario:</span> {customer?.username || "Cargando..."}</p>
           </div>
 
           {service.status === "completed" && (
             <div>
-              <h4 className="text-sm font-medium mb-2">Rating & Review</h4>
+              <h4 className="text-sm font-medium mb-2">Calificación y Reseña</h4>
               <div className="flex items-center space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star key={star} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
                 ))}
                 <span className="ml-2 text-sm text-gray-600">(5.0)</span>
               </div>
-              <p className="text-sm mt-2">"Excellent service! Very professional and timely delivery."</p>
+              <p className="text-sm mt-2">"Excelente servicio! Muy profesional y entrega puntual."</p>
             </div>
           )}
 
-          <div className="flex justify-between items-center">
-            <button className="w-full mr-2 p-2 border rounded bg-gray-100 flex items-center justify-center">
-              <Upload className="mr-2 h-4 w-4" /> Upload Files
-            </button>
-            <button className="w-full ml-2 p-2 border rounded bg-gray-100 flex items-center justify-center">
-              <QrCode className="mr-2 h-4 w-4" /> Show QR Code
+          <div className="flex justify-center">
+            <button className="w-full p-2 border rounded bg-gray-100 flex items-center justify-center">
+              <QrCode className="mr-2 h-4 w-4" /> Mostrar Código QR
             </button>
           </div>
 
           {service.status === "pending" && (
             <button className="w-full p-2 rounded bg-red-500 text-white hover:bg-red-600">
-              Cancel Service
+              Cancelar Servicio
             </button>
           )}
 
           <button onClick={onClose} className="w-full mt-4 p-2 border rounded bg-gray-200 hover:bg-gray-300">
-            Close
+            Cerrar
           </button>
         </div>
       </div>

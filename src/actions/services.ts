@@ -48,6 +48,16 @@ interface CreateServiceData {
   image: File;
 }
 
+interface Purchase {
+  id: number;
+  customer_id: number;
+  service_id: number;
+  business_id: number;
+  status: string;
+  purchase_date: string;
+  price: string;
+}
+
 export const getServices = async (): Promise<Service[]> => {
   try {
     const response = await fetch(`${API_URL}/services`);
@@ -127,5 +137,31 @@ export const getServicesByBusinessId = async (businessId: number): Promise<Servi
   } catch (error) {
     toast.error('Error fetching services');
     return [];
+  }
+};
+
+export const getPurchasesByBusinessId = async (businessId: number): Promise<Purchase[]> => {
+  try {
+    const response = await fetch(`${API_URL}/purchases/business/${businessId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch purchases');
+    }
+    return await response.json();
+  } catch (error) {
+    toast.error('Error fetching purchases');
+    return [];
+  }
+};
+
+export const getServiceById = async (serviceId: number): Promise<Service> => {
+  try {
+    const response = await fetch(`${API_URL}/services/${serviceId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch service details');
+    }
+    return await response.json();
+  } catch (error) {
+    toast.error('Error fetching service details');
+    throw error;
   }
 }; 

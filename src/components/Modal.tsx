@@ -1,5 +1,6 @@
 import * as React from "react";
-import { X } from "lucide-react";
+import { X, CheckCircle, AlertCircle } from "lucide-react";
+import { createPurchase } from "../actions/purchases";
 
 interface Service {
   id: number;
@@ -35,11 +36,54 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
+  const [notification, setNotification] = React.useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
   if (!isOpen || !service) return null;
+
+  const handlePurchase = async () => {
+    try {
+      await createPurchase({
+        customer_id: 11,
+        service_id: service.id,
+        business_id: service.business_id,
+        price: parseFloat(service.price)
+      });
+
+      setNotification({
+        type: 'success',
+        message: '¡Producto comprado exitosamente!'
+      });
+      
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    } catch (error) {
+      setNotification({
+        type: 'error',
+        message: 'Error al realizar la compra'
+      });
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md overflow-hidden relative">
+        {notification && (
+          <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg ${
+            notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          } flex items-center space-x-2`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{notification.message}</span>
+          </div>
+        )}
+
         <button
           className="absolute top-4 right-4 p-2 text-gray-600 hover:text-gray-900"
           onClick={onClose}
@@ -85,9 +129,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
         <div className="p-6 border-t border-gray-200">
           <button
             className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
-            onClick={onClose}
+            onClick={handlePurchase}
           >
-            Book Service
+            Comprar Servicio
           </button>
         </div>
       </div>

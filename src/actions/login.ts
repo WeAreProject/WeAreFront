@@ -11,6 +11,7 @@ interface LoginResponse {
   image: string;
   token: string;
   message: string;
+  role: string;
 }
 
 export const loginUser = async (credentials: LoginCredentials) => {
@@ -40,7 +41,8 @@ export const loginUser = async (credentials: LoginCredentials) => {
       full_name: data.full_name,
       email: data.email,
       username: data.username,
-      image: data.image
+      image: data.image,
+      role: data.role
     };
     localStorage.setItem("user", JSON.stringify(userData));
 

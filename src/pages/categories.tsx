@@ -18,6 +18,8 @@ export interface Category {
 const Categories = () => {
   const [isGrid, setIsGrid] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +28,7 @@ const Categories = () => {
       try {
         const data = await getCategories();
         setCategories(data);
+        setFilteredCategories(data);
       } catch (err) {
         setError("Error al cargar las categorías");
         console.error(err);
@@ -37,8 +40,16 @@ const Categories = () => {
     fetchCategories();
   }, []);
 
-  const featuredCategories = categories.filter((cat) => cat.featured);
-  const regularCategories = categories.filter((cat) => !cat.featured);
+  useEffect(() => {
+    const filtered = categories.filter(category => 
+      category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [searchQuery, categories]);
+
+  const featuredCategories = filteredCategories.filter((cat) => cat.featured);
+  const regularCategories = filteredCategories.filter((cat) => !cat.featured);
 
   if (isLoading) {
     return (
@@ -84,7 +95,10 @@ const Categories = () => {
           transition={{ delay: 0.2 }}
           className="mb-8"
         >
-          <SearchBar />
+          <SearchBar 
+            placeholder="Buscar categorías..."
+            onSearch={setSearchQuery}
+          />
         </motion.div>
 
         <div className="flex justify-between items-center mb-8">

@@ -46,6 +46,8 @@ const HomePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceWithBusiness | null>(null);
   const [services, setServices] = useState<ServiceWithBusiness[]>([]);
+  const [filteredServices, setFilteredServices] = useState<ServiceWithBusiness[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +57,6 @@ const HomePage: React.FC = () => {
         setLoading(true);
         const servicesData = await getServices();
         
-        // Obtener información de los negocios para cada servicio
         const servicesWithBusiness = await Promise.all(
           servicesData.map(async (service) => {
             const business = await getBusinessById(service.business_id);
@@ -64,7 +65,7 @@ const HomePage: React.FC = () => {
               provider: {
                 name: business.business_name,
                 image: business.image,
-                rating: 4.8, // Valores por defecto ya que no vienen en la API
+                rating: 4.8,
                 reviews: 150,
               },
             };
@@ -72,6 +73,7 @@ const HomePage: React.FC = () => {
         );
 
         setServices(servicesWithBusiness);
+        setFilteredServices(servicesWithBusiness);
       } catch (err) {
         setError("Error al cargar los servicios");
         console.error(err);
@@ -82,6 +84,16 @@ const HomePage: React.FC = () => {
 
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    const filtered = services.filter(service => 
+      service.service_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.provider.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredServices(filtered);
+  }, [searchQuery, services]);
 
   const handleOpenModal = (service: ServiceWithBusiness) => {
     setSelectedService(service);
@@ -118,7 +130,10 @@ const HomePage: React.FC = () => {
           Connect with trusted professionals for all your service needs
         </p>
         <div className="max-w-2xl mx-auto">
-          <SearchBar />
+          <SearchBar 
+            placeholder="Buscar servicios..."
+            onSearch={setSearchQuery}
+          />
         </div>
       </section>
 
@@ -147,7 +162,7 @@ const HomePage: React.FC = () => {
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold">Services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
+          {filteredServices.map((service) => (
             <div
               key={service.id}
               className="service-card bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300"

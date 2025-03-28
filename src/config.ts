@@ -1,0 +1,1 @@
+export const API_URL = 'https://rest-api-weare-production.up.railway.app'; 

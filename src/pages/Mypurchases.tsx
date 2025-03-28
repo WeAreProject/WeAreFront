@@ -1,59 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PurchaseCard } from "../components/PurchaseCard";
 import { SearchFilters } from "../components/SearchFilters";
 import Header from "../components/Header";
-// Mock data - in a real app, this would come from an API
-const mockPurchases = [
-  {
-    id: "1",
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    serviceName: "Website Development",
-    professionalName: "John Developer",
-    date: "March 15, 2024",
-    price: 299.99,
-    status: "completed" as const,
-  },
-  {
-    id: "2",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-    serviceName: "Logo Design",
-    professionalName: "Sarah Designer",
-    date: "March 10, 2024",
-    price: 149.99,
-    status: "pending" as const,
-  },
-  {
-    id: "3",
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-    serviceName: "SEO Optimization",
-    professionalName: "Mike Analytics",
-    date: "March 5, 2024",
-    price: 199.99,
-    status: "canceled" as const,
-  },
-];
+import { getCustomerPurchases, type Purchase } from "../actions/purchases";
 
 const Mypurchases = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredPurchases = mockPurchases.filter((purchase) => {
+  useEffect(() => {
+    const fetchPurchases = async () => {
+      try {
+        const userDataString = localStorage.getItem("user");
+        if (!userDataString) {
+          setError("No se encontró la información del usuario");
+          setLoading(false);
+          return;
+        }
+
+        const userData = JSON.parse(userDataString);
+        console.log('Datos del usuario:', userData);
+        const customerId = userData.id;
+        
+        if (!customerId) {
+          setError("No se encontró el ID del cliente en la información del usuario");
+          setLoading(false);
+          return;
+        }
+
+        const purchasesData = await getCustomerPurchases(customerId);
+        console.log('Datos de compras recibidos:', purchasesData);
+        setPurchases(purchasesData);
+      } catch (err) {
+        console.error('Error completo:', err);
+        setError(err instanceof Error ? err.message : "Error desconocido");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPurchases();
+  }, []);
+
+  const filteredPurchases = purchases.filter((purchase) => {
     const matchesSearch =
-      purchase.serviceName.toLowerCase().includes(search.toLowerCase()) ||
-      purchase.professionalName.toLowerCase().includes(search.toLowerCase());
+      purchase.service?.service_name.toLowerCase().includes(search.toLowerCase()) ||
+      purchase.service_id.toString().includes(search);
     
     const matchesStatus = statusFilter === "all" || purchase.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
+          <div className="text-center py-12">
+            <p className="text-gray-500">Cargando compras...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
+          <div className="text-center py-12">
+            <p className="text-red-500">{error}</p>
+            <p className="text-gray-500 mt-2">Por favor, intenta recargar la página</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header/>
       <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">My Purchases</h1>
-          <p className="text-gray-600">View and manage your purchase history</p>
+          <h1 className="text-3xl font-bold text-gray-900">Mis Compras</h1>
+          <p className="text-gray-600">Ver y gestionar tu historial de compras</p>
         </div>
 
         <SearchFilters
@@ -64,13 +99,27 @@ const Mypurchases = () => {
         />
 
         <div className="space-y-4">
-          {filteredPurchases.map((purchase) => (
-            <PurchaseCard key={purchase.id} purchase={purchase} />
-          ))}
+          {filteredPurchases.map((purchase) => {
+            console.log('Renderizando compra:', purchase);
+            return (
+              <PurchaseCard 
+                key={purchase.id} 
+                purchase={{
+                  id: purchase.id.toString(),
+                  image: purchase.service?.image || "",
+                  serviceName: purchase.service?.service_name || "",
+                  professionalName: purchase.business?.business_name || "Negocio no encontrado",
+                  date: new Date(purchase.purchase_date).toLocaleDateString(),
+                  price: parseFloat(purchase.price),
+                  status: purchase.status as "completed" | "pending" | "canceled",
+                }} 
+              />
+            );
+          })}
           
           {filteredPurchases.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No purchases found</p>
+              <p className="text-gray-500">No se encontraron compras</p>
             </div>
           )}
         </div>

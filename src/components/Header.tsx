@@ -1,12 +1,28 @@
 import { Menu, X, Home, Grid, ShoppingBag, CreditCard, Users, Briefcase, LayoutDashboard, Megaphone, Sun, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
+  useEffect(() => {
+    const userInfo = localStorage.getItem('user');
+    console.log('UserInfo from localStorage:', userInfo);
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      console.log('Parsed user:', user);
+      // Verificar si el rol está en user.role o user.type
+      const role = user.role || user.type;
+      console.log('User role/type:', role);
+      setUserRole(role);
+    }
+  }, []);
+
+  console.log('Current userRole state:', userRole);
+
   const isActive = (path: string) => location.pathname === path ? "bg-purple-600 text-white" : "hover:bg-gray-200";
 
   const handleNavigation = (path: string) => {
@@ -15,9 +31,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    // Limpiar el localStorage
     localStorage.clear();
-    // Redirigir al usuario a la página de login
     navigate("/login");
     setIsOpen(false);
   };
@@ -64,19 +78,21 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Sección: Servicios */}
-          <div className="mb-auto">
-            <p className="text-gray-500 uppercase text-sm font-semibold mb-2">My Services</p>
-            <button onClick={() => handleNavigation("/MyServices")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/MyServices")}`}>
-              <Briefcase className="w-5 h-5" /> <span>My Services</span>
-            </button>
-            <button onClick={() => handleNavigation("/ServiceDashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ServiceDashboard")}`}>
-              <LayoutDashboard className="w-5 h-5" /> <span>Service Dashboard</span>
-            </button>
-            <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>
-              <Megaphone className="w-5 h-5" /> <span>Ads & Promotions</span>
-            </button>
-          </div>
+          {/* Sección: Servicios (solo para owners) */}
+          {userRole === 'owner' && (
+            <div className="mb-auto">
+              <p className="text-gray-500 uppercase text-sm font-semibold mb-2">My Services</p>
+              <button onClick={() => handleNavigation("/MyServices")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/MyServices")}`}>
+                <Briefcase className="w-5 h-5" /> <span>My Services</span>
+              </button>
+              <button onClick={() => handleNavigation("/ServiceDashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ServiceDashboard")}`}>
+                <LayoutDashboard className="w-5 h-5" /> <span>Service Dashboard</span>
+              </button>
+              <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>
+                <Megaphone className="w-5 h-5" /> <span>Ads & Promotions</span>
+              </button>
+            </div>
+          )}
 
           {/* Sección: Configuración al final */}
           <div className="mt-auto">

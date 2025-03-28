@@ -53,7 +53,7 @@ const Header = () => {
             <button onClick={() => handleNavigation("/categories")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/categories")}`}>
               <Grid className="w-5 h-5" /> <span>Categories</span>
             </button>
-            <button onClick={() => handleNavigation("/purchases")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/purchases")}`}>
+            <button onClick={() => handleNavigation("/mypurchases")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/mypurchases")}`}>
               <ShoppingBag className="w-5 h-5" /> <span>My purchases</span>
             </button>
             <button onClick={() => handleNavigation("")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
@@ -70,7 +70,7 @@ const Header = () => {
             <button onClick={() => handleNavigation("/MyServices")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/MyServices")}`}>
               <Briefcase className="w-5 h-5" /> <span>My Services</span>
             </button>
-            <button onClick={() => handleNavigation("/ServiceDashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/dashboard")}`}>
+            <button onClick={() => handleNavigation("/ServiceDashboard")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ServiceDashboard")}`}>
               <LayoutDashboard className="w-5 h-5" /> <span>Service Dashboard</span>
             </button>
             <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>

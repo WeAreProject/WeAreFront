@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DollarSign, Users, CheckCircle, Star } from "lucide-react";
 import { getPurchasesByBusinessId, getBusinessByOwnerId } from "../../actions/services";
+import { getReviewsByBusinessId, calculateAverageRating } from "../../actions/reviews";
 
 interface Stats {
   totalEarnings: number;
@@ -28,17 +29,20 @@ const ServiceStats = () => {
 
         const businessId = businesses[0].id;
         const purchases = await getPurchasesByBusinessId(businessId);
+        const reviews = await getReviewsByBusinessId(businessId);
         
         const totalEarnings = purchases.reduce((acc, purchase) => acc + parseFloat(purchase.price), 0);
         const uniqueClients = new Set(purchases.map(p => p.customer_id)).size;
         const completedServices = purchases.filter(p => p.status === "completed").length;
+        const averageRating = calculateAverageRating(reviews);
         
         setStats({
           totalEarnings,
           activeClients: uniqueClients,
           completedServices,
-          averageRating: 4.9, // Por ahora lo dejamos estático ya que no tenemos datos de rating
+          averageRating,
         });
+        
       } catch (error) {
         console.error("Error fetching stats:", error);
       }

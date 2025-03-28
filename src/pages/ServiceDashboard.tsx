@@ -4,7 +4,7 @@ import Header from "../components/Header";
 
 const ServiceDashboard = () => {
   return (
-    <div className="container mx-auto py-8 px-4 space-y-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="container mx-auto py-8 px-4 space-y-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 mt-16">
       <Header/>
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Service Dashboard</h1>

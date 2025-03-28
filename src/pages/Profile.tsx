@@ -1,8 +1,16 @@
-import React, { useState } from "react";
-import { Star, MapPin, Upload } from "lucide-react";
-import { motion } from "framer-motion";
-import Header from "../components/Header"; 
-import AddExperienceModal from "../components/AddExperienceModal"; 
+import React, { useState, useEffect } from 'react';
+import { Star, MapPin, Upload } from 'lucide-react'; // Asegúrate de estar utilizando la versión más reciente de lucide-react
+import { motion } from 'framer-motion'; // Asegúrate de que framer-motion esté en su versión más reciente
+import Header from '../components/Header';
+import AddExperienceModal from '../components/AddExperienceModal';
+import { fetchOwner } from '../actions/owners';  // Verifica si la ruta de importación es correcta
+
+interface Owner {
+  name: string;
+  email: string;
+  phone: string;
+  image: string;
+}
 
 const workExperience = [
   {
@@ -60,27 +68,80 @@ const reviews = [
 ];
 
 const Profile = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [owner, setOwner] = useState<Owner | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = () => setIsModalOpen(true); 
-  const handleCloseModal = () => setIsModalOpen(false); 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const loadOwner = async () => {
+      const userData = localStorage.getItem("user");
+      console.log("userData:", userData);  // Verifica que los datos están en localStorage
+      if (!userData) {
+        console.error("No user data found");
+        setLoading(false);
+        return;
+      }
+  
+      const { id } = JSON.parse(userData);
+      setLoading(true); // Empieza a cargar los datos
+  
+      try {
+        const data = await fetchOwner(id);
+        console.log("Fetched data:", data); // Verifica los datos obtenidos
+        if (data) {
+          setOwner(data);
+          console.log("Owner state:", data); // Verifica que el estado se actualiza
+        } else {
+          console.log("No se pudo obtener los datos del dueño");
+        }
+      } catch (error) {
+        console.error("Error fetching owner:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    loadOwner();
+  }, []);
+  
+  if (loading) {
+    return <div className="text-center text-gray-600">Cargando...</div>;
+  }
+  
+  if (!owner) {
+    return <div className="text-center text-red-500">No se pudo cargar el perfil.</div>;
+  }
+  
   return (
     <div className="min-h-screen w-full max-w-7xl mx-auto px-4 py-8 space-y-12 pt-12">
       <Header />
-
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-lg shadow-lg p-6"
       >
         <div className="flex flex-col sm:flex-row items-start gap-6">
-          <div className="w-24 h-24 rounded-full bg-gray-200" />
+          {/* Imagen del usuario */}
+          <img
+            src={owner.image || "/path/to/default-image.jpg"}
+            alt={owner.name}
+            className="w-24 h-24 rounded-full object-cover bg-gray-200"
+          />
+  
           <div className="flex-1">
             <div className="flex justify-between items-start flex-wrap gap-4">
               <div>
-                <h1 className="text-2xl font-bold">John Doe</h1>
-                <p className="text-lg text-muted-foreground">Senior Software Engineer</p>
+                <h1 className="text-2xl font-bold">{owner.name}</h1>
+                <p className="text-lg text-muted-foreground">{owner.email}</p>
+                <p className="text-lg text-muted-foreground">{owner.phone}</p>
                 <div className="flex items-center mt-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -96,11 +157,6 @@ const Profile = () => {
                 Upload CV
               </button>
             </div>
-            <p className="mt-4 text-muted-foreground">
-              Passionate software engineer with over 5 years of experience in full-stack
-              development. Specialized in building scalable web applications and
-              mentoring junior developers.
-            </p>
           </div>
         </div>
       </motion.section>

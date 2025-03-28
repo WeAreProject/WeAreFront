@@ -33,45 +33,75 @@ export interface CategoryDetails {
   services: Service[];
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error("No se encontró el token de autenticación");
+  }
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
+
 export async function getCategories(): Promise<Category[]> {
   try {
-    const response = await fetch(`${API_URL}/categories`);
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}/categories`, { headers });
+    
     if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        throw new Error("Sesión expirada");
+      }
       throw new Error("Error al obtener las categorías");
     }
     
     const categories = await response.json();
     
-    // Transformamos los datos de la API al formato que espera nuestra interfaz
     return categories.map((title: string, index: number) => ({
       id: (index + 1).toString(),
       title,
       description: `Servicios relacionados con ${title}`,
       icon: getCategoryIcon(title),
-      featured: index < 3, // Las primeras 3 categorías serán destacadas
+      featured: index < 3,
     }));
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error en getCategories:", error);
     throw error;
   }
 }
 
 export const getCategoryDetails = async (categoryName: string): Promise<CategoryDetails> => {
   try {
-    const response = await fetch(`${API_URL}/categories/${categoryName}`);
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}/categories/${categoryName.toLowerCase()}`, { headers });
+    
     if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        throw new Error("Sesión expirada");
+      }
       throw new Error('Error al obtener los detalles de la categoría');
     }
+    
     const data = await response.json();
     
-    // Obtener la información de los negocios para cada servicio
     const servicesWithProvider = await Promise.all(
       data.services.map(async (service: Service) => {
-        // Obtener la información del negocio
-        const businessResponse = await fetch(`${API_URL}/businesses/${service.business_id}`);
+        const businessResponse = await fetch(`${API_URL}/businesses/${service.business_id}`, { headers });
+        
         if (!businessResponse.ok) {
+          if (businessResponse.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            throw new Error("Sesión expirada");
+          }
           throw new Error('Error al obtener la información del negocio');
         }
+        
         const businessData = await businessResponse.json();
         
         return {
@@ -91,19 +121,17 @@ export const getCategoryDetails = async (categoryName: string): Promise<Category
       services: servicesWithProvider
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error en getCategoryDetails:', error);
     throw error;
   }
 };
 
-// Función auxiliar para asignar iconos según la categoría
 function getCategoryIcon(title: string): string {
   const iconMap: { [key: string]: string } = {
     Tech: "briefcase",
     Beauty: "heart",
     cafe: "coffee",
-    // Agrega más mapeos según necesites
   };
   
-  return iconMap[title] || "star"; // Icono por defecto si no hay coincidencia
+  return iconMap[title] || "star";
 } 

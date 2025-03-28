@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Modal from "../components/Modal";
 import { SearchBar } from "../components/SearchBar";
 import { getServices, getBusinessById } from "../actions/services";
+import { useNavigate } from "react-router-dom";
 
 interface Service {
   id: number;
@@ -50,6 +51,7 @@ const HomePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -176,7 +178,13 @@ const HomePage: React.FC = () => {
               </div>
 
               <div className="p-4 space-y-3">
-                <div className="flex items-center space-x-3">
+                <div 
+                  className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/business/${service.business_id}`);
+                  }}
+                >
                   <div className="w-10 h-10 rounded-full overflow-hidden border">
                     <img
                       src={service.provider.image}
@@ -185,7 +193,7 @@ const HomePage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <p className="font-semibold">{service.provider.name}</p>
+                    <p className="font-semibold hover:text-purple-600">{service.provider.name}</p>
                     <div className="flex items-center text-sm text-gray-500">
                       <Star className="w-4 h-4 text-yellow-400 ml-1" />
                       <span>

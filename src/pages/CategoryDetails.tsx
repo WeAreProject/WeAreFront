@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import Header from "../components/Header";
@@ -8,6 +8,7 @@ import { getCategoryDetails, Business, Service } from "../actions/categories";
 
 const CategoryDetails = () => {
   const { categoryName } = useParams<{ categoryName: string }>();
+  const navigate = useNavigate();
   const [details, setDetails] = useState<{ businesses: Business[]; services: Service[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +84,8 @@ const CategoryDetails = () => {
               key={business.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="service-card bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300"
+              className="service-card bg-white p-4 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer"
+              onClick={() => navigate(`/business/${business.id}`)}
             >
               <div className="relative h-40 w-full rounded-t-xl overflow-hidden bg-gray-200">
                 <img
@@ -95,7 +97,7 @@ const CategoryDetails = () => {
 
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">{business.business_name}</h3>
+                  <h3 className="font-semibold text-lg hover:text-purple-600">{business.business_name}</h3>
                   <div className="flex items-center text-sm text-gray-500">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
                     <span>4.5</span>
@@ -122,22 +124,44 @@ const CategoryDetails = () => {
             >
               <div className="relative h-40 w-full rounded-t-xl overflow-hidden bg-gray-200">
                 <img
-                  src={service.image || 'https://via.placeholder.com/400x300'}
+                  src={service.image}
                   alt={service.service_name}
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-lg">{service.service_name}</h3>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span>4.5</span>
+                <div 
+                  className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/business/${service.business_id}`);
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-full overflow-hidden border">
+                    <img
+                      src={service.provider.image}
+                      alt={service.provider.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold hover:text-purple-600">{service.provider.name}</p>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                      <span>{service.provider.rating} ({service.provider.reviews})</span>
+                    </div>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-500">{service.description}</p>
+                <div>
+                  <h3 className="font-semibold text-lg">{service.service_name}</h3>
+                  <p className="text-sm text-gray-500">{service.description}</p>
+                </div>
+
+                <div className="flex items-center justify-between text-sm font-medium">
+                  <span>${service.price}</span>
+                </div>
 
                 <button 
                   className="w-full py-2 text-center bg-purple-200 text-purple-700 font-semibold rounded-lg hover:bg-purple-300 transition"

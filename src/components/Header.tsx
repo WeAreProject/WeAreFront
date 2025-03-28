@@ -1,4 +1,4 @@
-import { Menu, X, Home, Grid, ShoppingBag, CreditCard, Users, Briefcase, LayoutDashboard, Megaphone, Sun, Settings, LogOut } from "lucide-react";
+import { Menu, X, Home, Grid, ShoppingBag, CreditCard, Users, Briefcase, LayoutDashboard, Megaphone, Sun, Settings, LogOut, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -91,17 +91,25 @@ const Header = () => {
               <button onClick={() => handleNavigation("/ads")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/ads")}`}>
                 <Megaphone className="w-5 h-5" /> <span>Ads & Promotions</span>
               </button>
+              <button onClick={() => handleNavigation("/Negocio")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/Negocio")}`}>
+                <Briefcase className="w-5 h-5" /> <span>Negocio</span>
+              </button>
+          
+              <button onClick={() => handleNavigation("/profile")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/profile")}`}>
+              <User className="w-5 h-5" /> <span>Profile</span>
+            </button>
             </div>
+         
           )}
 
           {/* Sección: Configuración al final */}
           <div className="mt-auto">
             <p className="text-gray-500 uppercase text-sm font-semibold mb-2">Settings</p>
-            <button onClick={() => handleNavigation("/light-mode")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/light-mode")}`}>
+            <button  className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/light-mode")}`}>
               <Sun className="w-5 h-5" /> <span>Light Mode</span>
             </button>
-            <button onClick={() => handleNavigation("/settings")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/settings")}`}>
-              <Settings className="w-5 h-5" /> <span>Settings</span>
+            <button onClick={() => handleNavigation("/profile-settings")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/profile-settings")}`}>
+              <Settings className="w-5 h-5" /> <span>Profile Settings</span>
             </button>
             <button onClick={handleLogout} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 text-red-500 w-full text-left">
               <LogOut className="w-5 h-5" /> <span>Logout</span>

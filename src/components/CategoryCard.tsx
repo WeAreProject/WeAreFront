@@ -8,7 +8,7 @@ export const CategoryCard = ({ id, title, description, icon, featured }: Categor
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/category/${title}`);
+    navigate(`/categories/${title.toLowerCase()}`);
   };
 
   const IconComponent = icons[icon as keyof typeof icons] as LucideIcon;

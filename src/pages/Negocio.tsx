@@ -1,50 +1,42 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { getBusinessById } from "../actions/services";
+import { fetchBusinessData } from "../actions/business";
 import { getServicesByBusinessId } from "../actions/services";
 import ServiceModal from "../components/ServiceModal";
 import Header from "../components/Header";
-import { Star } from "lucide-react";
-
-const BusinessDetails = () => {
-  const { businessId } = useParams<{ businessId: string }>();
+const Negocio = () => {
   const [business, setBusiness] = useState<any | null>(null);
   const [services, setServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchBusinessData = async () => {
-      if (!businessId) return;
+    const getBusinessData = async () => {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        console.error("No user data found");
+        setLoading(false);
+        return;
+      }
+
+      const { id } = JSON.parse(userData);
 
       try {
         // Obtener negocio
-        const businessData = await getBusinessById(parseInt(businessId));
+        const businessData = await fetchBusinessData(id);
         setBusiness(businessData);
 
         // Obtener servicios por business_id
-        const servicesData = await getServicesByBusinessId(parseInt(businessId));
+        const servicesData = await getServicesByBusinessId(businessData.id);
         setServices(servicesData);
       } catch (error) {
-        console.error("Error fetching business data:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBusinessData();
-  }, [businessId]);
-
-  const handleOpenModal = (service: any) => {
-    setSelectedService(service);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedService(null);
-  };
+    getBusinessData();
+  }, []);
 
   if (loading) {
     return <div className="text-center text-gray-600">Cargando...</div>;
@@ -55,8 +47,9 @@ const BusinessDetails = () => {
   }
 
   return (
+    
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6 md:p-12 lg:p-16">
-      <Header />
+        <Header />
       <main className="max-w-5xl mx-auto bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-xl shadow-xl">
         {/* Imagen del negocio */}
         <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gray-300 flex items-center justify-center rounded-lg mb-6 overflow-hidden">
@@ -82,7 +75,7 @@ const BusinessDetails = () => {
               <p className="text-gray-600">{business.email}</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-gray-800">Operation Hours</h3>
+              <h3 className="text-xl font-semibold text-gray-800">Operation_Hours</h3>
               <p className="text-gray-600">{business.operation_hours}</p>
             </div>
           </div>
@@ -97,87 +90,42 @@ const BusinessDetails = () => {
 
         {/* WhatsApp Button */}
         <div className="mt-6">
-          <a 
-            href={`https://wa.me/${business.phone}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all w-full sm:w-auto inline-block text-center"
-          >
-            Contactar por WhatsApp
-          </a>
+          <button className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all w-full sm:w-auto">
+            WhatsApp
+          </button>
         </div>
       </main>
 
-      {/* Servicios */}
+      {/* Servicios dinámicos */}
       <section className="max-w-5xl mx-auto mt-12">
         <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Servicios</h3>
         {services.length === 0 ? (
           <p className="text-gray-600 text-center">No hay servicios disponibles.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <div
                 key={service.id}
-                className="service-card bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300"
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setSelectedService(service)}
               >
-                <div className="relative h-40 w-full rounded-t-xl overflow-hidden">
-                  <img
-                    src={service.image}
-                    alt={service.service_name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="p-4 space-y-2">
-                  <div 
-                    className="flex items-center space-x-3 mb-2"
-                  >
-                    <div className="w-10 h-10 rounded-full overflow-hidden border">
-                      <img
-                        src={business.image}
-                        alt={business.business_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-semibold">{business.business_name}</p>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Star className="w-4 h-4 text-yellow-400 ml-1" />
-                        <span>4.5 (150)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-lg">{service.service_name}</h3>
-                    <p className="text-sm text-gray-500 line-clamp-2">{service.description}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm font-medium pt-2">
-                    <span>${service.price}</span>
-                  </div>
-
-                  <button 
-                    className="w-full py-2 text-center bg-purple-200 text-purple-700 font-semibold rounded-lg hover:bg-purple-300 transition"
-                    onClick={() => handleOpenModal(service)}
-                  >
-                    Ver Detalles
-                  </button>
-                </div>
+                <h4 className="text-xl font-semibold text-gray-800">{service.service_name}</h4>
+                <p className="text-gray-600 mt-2">{service.description}</p>
+                <p className="text-purple-600 font-semibold mt-2">${service.price}</p>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {isModalOpen && selectedService && (
+      {selectedService && (
         <ServiceModal
           service={selectedService}
-          onClose={handleCloseModal}
+          onClose={() => setSelectedService(null)}
         />
       )}
     </div>
   );
 };
 
-export default BusinessDetails;
+export default Negocio;

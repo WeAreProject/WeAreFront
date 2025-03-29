@@ -41,6 +41,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
     message: string;
   } | null>(null);
 
+  React.useEffect(() => {
+    if (!isOpen) {
+      setNotification(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen || !service) return null;
 
   const handlePurchase = async () => {

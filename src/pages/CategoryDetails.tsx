@@ -4,19 +4,51 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import Header from "../components/Header";
 import Modal from "../components/Modal";
-import { getCategoryDetails, Business, Service } from "../actions/categories";
+import { getCategoryDetails, Business as APIBusiness, Service as APIService } from "../actions/categories";
+import { Service, ServiceWithBusiness } from "../types/service";
 
 const CategoryDetails = () => {
   const { categoryName } = useParams<{ categoryName: string }>();
   const navigate = useNavigate();
-  const [details, setDetails] = useState<{ businesses: Business[]; services: Service[] } | null>(null);
+  const [details, setDetails] = useState<{ businesses: APIBusiness[]; services: Service[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceWithBusiness | null>(null);
+
+  const transformAPIServiceToService = (apiService: APIService): Service => ({
+    id: apiService.id.toString(),
+    name: apiService.service_name,
+    description: apiService.description,
+    price: parseFloat(apiService.price),
+    category: apiService.category,
+    thumbnail: apiService.image,
+    status: "active",
+    bookings: 0,
+    business_id: apiService.business_id,
+    service_name: apiService.service_name,
+    image: apiService.image,
+    created_at: apiService.created_at,
+    updated_at: apiService.updated_at,
+    provider: apiService.provider,
+  });
 
   const handleOpenModal = (service: Service) => {
-    setSelectedService(service);
+    const serviceWithBusiness: ServiceWithBusiness = {
+      ...service,
+      provider: {
+        name: service.provider?.name || "Provider Name",
+        image: service.provider?.image || service.thumbnail?.toString() || "",
+        rating: service.provider?.rating || 4.5,
+        reviews: service.provider?.reviews || 100,
+      },
+      business_id: service.business_id || 1,
+      service_name: service.name,
+      image: service.thumbnail?.toString() || "",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setSelectedService(serviceWithBusiness);
     setIsModalOpen(true);
   };
 
@@ -31,7 +63,10 @@ const CategoryDetails = () => {
       
       try {
         const data = await getCategoryDetails(categoryName);
-        setDetails(data);
+        setDetails({
+          businesses: data.businesses,
+          services: data.services.map(transformAPIServiceToService),
+        });
       } catch (err) {
         setError("Error al cargar los detalles de la categoría");
         console.error(err);
@@ -124,38 +159,40 @@ const CategoryDetails = () => {
             >
               <div className="relative h-40 w-full rounded-t-xl overflow-hidden bg-gray-200">
                 <img
-                  src={service.image}
-                  alt={service.service_name}
+                  src={service.image || service.thumbnail?.toString() || 'https://via.placeholder.com/400x300'}
+                  alt={service.service_name || service.name}
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <div className="p-4 space-y-3">
-                <div 
-                  className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/business/${service.business_id}`);
-                  }}
-                >
-                  <div className="w-10 h-10 rounded-full overflow-hidden border">
-                    <img
-                      src={service.provider.image}
-                      alt={service.provider.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold hover:text-purple-600">{service.provider.name}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                      <span>{service.provider.rating} ({service.provider.reviews})</span>
+                {service.provider && (
+                  <div 
+                    className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/business/${service.business_id}`);
+                    }}
+                  >
+                    <div className="w-10 h-10 rounded-full overflow-hidden border">
+                      <img
+                        src={service.provider.image}
+                        alt={service.provider.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-semibold hover:text-purple-600">{service.provider.name}</p>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                        <span>{service.provider.rating} ({service.provider.reviews})</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div>
-                  <h3 className="font-semibold text-lg">{service.service_name}</h3>
+                  <h3 className="font-semibold text-lg">{service.service_name || service.name}</h3>
                   <p className="text-sm text-gray-500">{service.description}</p>
                 </div>
 

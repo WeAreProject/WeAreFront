@@ -6,24 +6,7 @@ import Modal from "../components/Modal";
 import { SearchBar } from "../components/SearchBar";
 import { getServices, getBusinessById } from "../actions/services";
 import { useNavigate } from "react-router-dom";
-
-interface Service {
-  id: number;
-  business_id: number;
-  service_name: string;
-  category: string;
-  price: string;
-  description: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Business {
-  id: number;
-  business_name: string;
-  image: string;
-}
+import { Service } from "../types/service";
 
 interface ServiceWithBusiness extends Service {
   provider: {
@@ -32,6 +15,11 @@ interface ServiceWithBusiness extends Service {
     rating: number;
     reviews: number;
   };
+  business_id: number;
+  service_name: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const categories = [
@@ -63,7 +51,19 @@ const HomePage: React.FC = () => {
           servicesData.map(async (service) => {
             const business = await getBusinessById(service.business_id);
             return {
-              ...service,
+              id: service.id.toString(),
+              name: service.service_name,
+              description: service.description,
+              price: Number(service.price),
+              category: service.category,
+              thumbnail: service.image,
+              status: "active",
+              bookings: 0,
+              business_id: service.business_id,
+              service_name: service.service_name,
+              image: service.image,
+              created_at: service.created_at,
+              updated_at: service.updated_at,
               provider: {
                 name: business.business_name,
                 image: business.image,

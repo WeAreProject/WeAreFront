@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Star, MapPin, Upload } from 'lucide-react'; // Asegúrate de estar utilizando la versión más reciente de lucide-react
-import { motion } from 'framer-motion'; // Asegúrate de que framer-motion esté en su versión más reciente
+import { useState, useEffect } from 'react';
+import { Star, Upload } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import AddExperienceModal from '../components/AddExperienceModal';
-import { fetchOwner } from '../actions/owners';  // Verifica si la ruta de importación es correcta
+import { fetchOwner } from '../actions/owners';
 
 interface Owner {
   name: string;
@@ -140,8 +140,8 @@ const Profile = () => {
             <div className="flex justify-between items-start flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl font-bold">{owner.name}</h1>
-                <p className="text-lg text-muted-foreground">{owner.email}</p>
-                <p className="text-lg text-muted-foreground">{owner.phone}</p>
+                <p className="text-lg text-gray-600">{owner.email}</p>
+                <p className="text-lg text-gray-600">{owner.phone}</p>
                 <div className="flex items-center mt-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -149,7 +149,7 @@ const Profile = () => {
                       className={`w-5 h-5 ${i < 4 ? "text-yellow-400" : "text-gray-300"}`}
                     />
                   ))}
-                  <span className="ml-2 text-sm text-muted-foreground">(4.0)</span>
+                  <span className="ml-2 text-sm text-gray-600">(4.0)</span>
                 </div>
               </div>
               <button className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200">
@@ -181,8 +181,8 @@ const Profile = () => {
               className="bg-white p-4 rounded-lg shadow border-l-4 border-purple-600"
             >
               <h3 className="font-semibold">{work.title}</h3>
-              <p className="text-sm text-muted-foreground">{work.period}</p>
-              <p className="mt-2 text-muted-foreground">{work.description}</p>
+              <p className="text-sm text-gray-600">{work.period}</p>
+              <p className="mt-2 text-gray-600">{work.description}</p>
             </motion.div>
           ))}
         </div>
@@ -199,7 +199,7 @@ const Profile = () => {
               className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
             >
               <h3 className="font-semibold">{service.title}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
+              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-purple-600">{service.price}</span>
                 <button className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200">
@@ -255,7 +255,7 @@ const Profile = () => {
                   />
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground">{review.comment}</p>
+              <p className="text-sm text-gray-600">{review.comment}</p>
             </motion.div>
           ))}
         </div>

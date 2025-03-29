@@ -1,53 +1,58 @@
 import { useState } from "react";
 import { MessageCircle, CheckCircle, XCircle } from "lucide-react";
 import ServiceDetailsDialog from "./ServiceDetailsDialog";
+import { Service } from "../../types/service";
 
-interface Service {
-  id: string;
-  name: string;
-  category: string;
+interface ServiceListItem extends Service {
   client: {
     name: string;
     avatar: string;
   };
   date: string;
   time: string;
-  status: "pending" | "ongoing" | "completed" | "canceled";
   payment: "paid" | "pending" | "refunded";
   earnings?: number;
 }
 
-const mockServices: Service[] = [
+const mockServices: ServiceListItem[] = [
   {
     id: "1",
     name: "Website Design",
+    description: "Professional website design service",
+    price: 1500,
     category: "Design",
+    thumbnail: "/placeholder.svg",
+    status: "pending",
+    bookings: 0,
     client: {
       name: "Alex Thompson",
       avatar: "/placeholder.svg",
     },
     date: "2024-03-20",
     time: "14:30",
-    status: "pending",
     payment: "pending",
   },
   {
     id: "2",
     name: "SEO Optimization",
+    description: "Search engine optimization service",
+    price: 1500,
     category: "Marketing",
+    thumbnail: "/placeholder.svg",
+    status: "ongoing",
+    bookings: 1,
     client: {
       name: "Sarah Wilson",
       avatar: "/placeholder.svg",
     },
     date: "2024-03-21",
     time: "10:00",
-    status: "ongoing",
     payment: "paid",
     earnings: 1500,
   },
 ];
 
-const getStatusColor = (status: Service["status"]) => {
+const getStatusColor = (status: ServiceListItem["status"]) => {
   switch (status) {
     case "pending":
       return "bg-yellow-100 text-yellow-800";
@@ -60,7 +65,7 @@ const getStatusColor = (status: Service["status"]) => {
   }
 };
 
-const getPaymentColor = (payment: Service["payment"]) => {
+const getPaymentColor = (payment: ServiceListItem["payment"]) => {
   switch (payment) {
     case "paid":
       return "bg-green-100 text-green-800";
@@ -72,14 +77,18 @@ const getPaymentColor = (payment: Service["payment"]) => {
 };
 
 interface ServiceListProps {
-  status: Service["status"];
+  status: ServiceListItem["status"];
 }
 
 const ServiceList = ({ status }: ServiceListProps) => {
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceListItem | null>(null);
   const filteredServices = mockServices.filter(
     (service) => service.status === status
   );
+
+  const handleOpenDialog = (service: ServiceListItem) => {
+    setSelectedService(service);
+  };
 
   return (
     <div className="space-y-4">
@@ -87,7 +96,7 @@ const ServiceList = ({ status }: ServiceListProps) => {
         <div
           key={service.id}
           className="p-6 flex justify-between items-center rounded-lg shadow-md cursor-pointer backdrop-blur-sm bg-white/50 transition-all hover:shadow-lg"
-          onClick={() => setSelectedService(service)}
+          onClick={() => handleOpenDialog(service)}
         >
           <div className="flex items-center space-x-4">
             <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">

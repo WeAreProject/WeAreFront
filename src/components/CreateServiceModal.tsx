@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Dialog, DialogTitle, DialogContent, TextField, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import { ServiceFormData } from "../types/service";
-import { toast } from "sonner";
 import { X } from "lucide-react";
+import { ServiceFormData } from "../types/service";
 
 interface CreateServiceModalProps {
   open: boolean;

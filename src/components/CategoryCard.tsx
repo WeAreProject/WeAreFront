@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import * as icons from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
-export const CategoryCard = ({ id, title, description, icon, featured }: Category) => {
+export const CategoryCard = ({ title, description, icon, featured }: Category) => {
   const navigate = useNavigate();
 
   const handleClick = () => {

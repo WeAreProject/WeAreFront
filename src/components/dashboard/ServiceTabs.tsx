@@ -2,15 +2,7 @@ import { useState, useEffect } from "react";
 import { getPurchasesByBusinessId, getServiceById, getBusinessByOwnerId } from "../../actions/services";
 import { Clock, Calendar } from "lucide-react";
 import ServiceDetailsDialog from "./ServiceDetailsDialog";
-
-interface Service {
-  id: number;
-  service_name: string;
-  price: string;
-  description: string;
-  image: string;
-  category: string;
-}
+import { Service } from "../../types/service";
 
 interface Purchase {
   id: number;
@@ -23,7 +15,7 @@ interface Purchase {
 }
 
 interface ServiceWithDetails extends Purchase {
-  serviceDetails?: Service;
+  serviceDetails: Service;
 }
 
 const ServiceList = ({ status }: { status: string }) => {
@@ -49,18 +41,33 @@ const ServiceList = ({ status }: { status: string }) => {
           filteredPurchases.map(async (purchase) => {
             try {
               const serviceDetails = await getServiceById(purchase.service_id);
+              const transformedService: Service = {
+                id: serviceDetails.id.toString(),
+                name: serviceDetails.service_name,
+                description: serviceDetails.description,
+                price: parseFloat(serviceDetails.price),
+                category: serviceDetails.category,
+                thumbnail: serviceDetails.image,
+                status: "active",
+                bookings: 0,
+                business_id: serviceDetails.business_id,
+                service_name: serviceDetails.service_name,
+                image: serviceDetails.image,
+                created_at: serviceDetails.created_at,
+                updated_at: serviceDetails.updated_at,
+              };
               return {
                 ...purchase,
-                serviceDetails,
+                serviceDetails: transformedService,
               };
             } catch (error) {
               console.error(`Error fetching service details for ID ${purchase.service_id}:`, error);
-              return purchase;
+              return null;
             }
           })
         );
 
-        setServices(servicesWithDetails);
+        setServices(servicesWithDetails.filter((service): service is ServiceWithDetails => service !== null));
       } catch (error) {
         console.error("Error fetching services:", error);
       } finally {
@@ -95,8 +102,8 @@ const ServiceList = ({ status }: { status: string }) => {
             <div className="flex gap-6">
               <div className="w-32 h-32 flex-shrink-0">
                 <img
-                  src={service.serviceDetails?.image || "https://via.placeholder.com/150"}
-                  alt={service.serviceDetails?.service_name}
+                  src={service.serviceDetails.image || "https://via.placeholder.com/150"}
+                  alt={service.serviceDetails.name}
                   className="w-full h-full object-cover rounded-lg"
                 />
               </div>
@@ -104,10 +111,10 @@ const ServiceList = ({ status }: { status: string }) => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {service.serviceDetails?.service_name || "Servicio no encontrado"}
+                      {service.serviceDetails.name}
                     </h3>
                     <span className="inline-block px-3 py-1 text-sm font-medium text-primary bg-primary/10 rounded-full mt-2">
-                      {service.serviceDetails?.category || "Sin categoría"}
+                      {service.serviceDetails.category}
                     </span>
                   </div>
                   <div className="text-right">
@@ -119,7 +126,7 @@ const ServiceList = ({ status }: { status: string }) => {
                   </div>
                 </div>
                 <p className="text-gray-600 mt-2 line-clamp-2">
-                  {service.serviceDetails?.description || "Sin descripción"}
+                  {service.serviceDetails.description}
                 </p>
                 <div className="mt-4 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-500" />
@@ -135,21 +142,7 @@ const ServiceList = ({ status }: { status: string }) => {
 
       {selectedService && (
         <ServiceDetailsDialog
-          service={{
-            id: selectedService.id.toString(),
-            name: selectedService.serviceDetails?.service_name || "Servicio no encontrado",
-            category: selectedService.serviceDetails?.category || "Sin categoría",
-            client: {
-              name: "Cliente #" + selectedService.customer_id,
-              avatar: "https://via.placeholder.com/150",
-            },
-            date: new Date(selectedService.purchase_date).toLocaleDateString(),
-            time: new Date(selectedService.purchase_date).toLocaleTimeString(),
-            status: selectedService.status as "pending" | "ongoing" | "completed" | "canceled",
-            payment: "paid",
-            earnings: parseFloat(selectedService.price),
-            customer_id: selectedService.customer_id,
-          }}
+          service={selectedService.serviceDetails}
           onClose={() => setSelectedService(null)}
         />
       )}
@@ -160,41 +153,31 @@ const ServiceList = ({ status }: { status: string }) => {
 const ServiceTabs = () => {
   const [activeTab, setActiveTab] = useState("pending");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "ongoing":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "canceled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const tabs = [
+    { id: "pending", label: "Pendientes" },
+    { id: "ongoing", label: "En Progreso" },
+    { id: "completed", label: "Completados" },
+    { id: "canceled", label: "Cancelados" },
+  ];
 
   return (
-    <div className="w-full">
-      <div className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm p-1 rounded-lg">
-        {["pending", "ongoing", "completed", "canceled"].map((tab) => (
+    <div className="space-y-6">
+      <div className="flex space-x-4 border-b">
+        {tabs.map((tab) => (
           <button
-            key={tab}
-            className={`p-3 text-center rounded-md transition-all ${
-              activeTab === tab 
-                ? `${getStatusColor(tab)} font-semibold` 
-                : "hover:bg-gray-100"
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "text-primary border-b-2 border-primary"
+                : "text-gray-500 hover:text-gray-700"
             }`}
-            onClick={() => setActiveTab(tab)}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab.label}
           </button>
         ))}
       </div>
-      <div className="mt-6 animate-fade-up">
-        <ServiceList status={activeTab} />
-      </div>
+      <ServiceList status={activeTab} />
     </div>
   );
 };

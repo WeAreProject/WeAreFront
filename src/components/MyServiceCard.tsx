@@ -1,15 +1,14 @@
 import { Service } from '../types/service';
-import { Eye, MoreVertical, Pencil, Trash, Trash2, Power, PowerOff, Image } from "lucide-react";
+import { Eye, MoreVertical, Pencil, Trash, Image } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 interface ServiceCardProps {
   service: Service;
   onDelete: (id: string) => void;
-  onToggleStatus: (id: string) => void;
 }
 
-const MyServiceCard = ({ service, onDelete, onToggleStatus }: ServiceCardProps) => {
+const MyServiceCard = ({ service, onDelete }: ServiceCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);

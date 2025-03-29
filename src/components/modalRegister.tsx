@@ -98,11 +98,9 @@ const BusinessForm = ({ nextStep, formData, setFormData }: {
   );
 };
 
-const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: { 
-  prevStep: () => void; 
+const BusinessContact = ({ prevStep, nextStep }: {
+  prevStep: () => void;
   nextStep: () => void;
-  formData: any;
-  setFormData: (data: any) => void;
 }) => {
   const [localFormData, setLocalFormData] = useState({
     email: "",
@@ -131,7 +129,6 @@ const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setLocalFormData((prev) => ({ ...prev, [name]: value }));
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +139,6 @@ const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: {
         businessLogo: file,
         previewLogo: URL.createObjectURL(file)
       });
-      setFormData((prev: any) => ({ ...prev, image: file }));
     }
   };
 
@@ -239,10 +235,8 @@ const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: {
 interface BusinessDetailsProps {
     prevStep: () => void;
     nextStep: () => void;
-    formData: any;
-    setFormData: (data: any) => void;
   }
-const BusinessDetails = ({ prevStep, nextStep, formData, setFormData }: BusinessDetailsProps) => {
+const BusinessDetails = ({ prevStep, nextStep }: BusinessDetailsProps) => {
   const [localFormData, setLocalFormData] = useState({
     businessLocation: "",
     operatingHours: "",
@@ -268,7 +262,6 @@ const BusinessDetails = ({ prevStep, nextStep, formData, setFormData }: Business
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setLocalFormData((prev) => ({ ...prev, [name]: value }));
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -572,8 +565,8 @@ const ModalRegister = () => {
   return (
     <div>
       {step === 1 && <BusinessForm nextStep={nextStep} formData={formData} setFormData={setFormData} />}
-      {step === 2 && <BusinessContact prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
-      {step === 3 && <BusinessDetails prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
+      {step === 2 && <BusinessContact prevStep={prevStep} nextStep={nextStep} />}
+      {step === 3 && <BusinessDetails prevStep={prevStep} nextStep={nextStep} />}
       {step === 4 && <BusinessVerification prevStep={prevStep} formData={formData} setFormData={setFormData} />}
     </div>
   );

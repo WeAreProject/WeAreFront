@@ -93,16 +93,6 @@ const MyServices = () => {
     setServices((prev) => prev.filter((service) => service.id !== id));
   };
 
-  const handleToggleStatus = (id: string) => {
-    setServices((prev) =>
-      prev.map((service) =>
-        service.id === id
-          ? { ...service, status: service.status === "active" ? "disabled" : "active" }
-          : service
-      )
-    );
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -126,7 +116,6 @@ const MyServices = () => {
               key={service.id}
               service={service}
               onDelete={handleDeleteService}
-              onToggleStatus={handleToggleStatus}
             />
           ))}
         </div>

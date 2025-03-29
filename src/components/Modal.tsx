@@ -1,24 +1,7 @@
 import * as React from "react";
 import { X, CheckCircle, AlertCircle } from "lucide-react";
 import { createPurchase } from "../actions/purchases";
-
-interface Service {
-  id: number;
-  business_id: number;
-  service_name: string;
-  category: string;
-  price: string;
-  description: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Business {
-  id: number;
-  business_name: string;
-  image: string;
-}
+import { Service } from "../types/service";
 
 interface ServiceWithBusiness extends Service {
   provider: {
@@ -27,6 +10,11 @@ interface ServiceWithBusiness extends Service {
     rating: number;
     reviews: number;
   };
+  business_id: number;
+  service_name: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ModalProps {
@@ -53,9 +41,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
     try {
       await createPurchase({
         customer_id: 11,
-        service_id: service.id,
+        service_id: Number(service.id),
         business_id: service.business_id,
-        price: parseFloat(service.price)
+        price: Number(service.price)
       });
 
       setNotification({
@@ -99,7 +87,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
 
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold">{service.service_name}</h2>
-     
         </div>
 
         <div className="p-6">

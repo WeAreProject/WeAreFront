@@ -9,6 +9,7 @@ interface QRCodeModalProps {
 
 export function QRCodeModal({ isOpen, onClose, purchaseId }: QRCodeModalProps) {
   const handleDownload = () => {
+    console.log('Downloading QR code for purchase:', purchaseId);
     toast.success("QR Code downloaded successfully");
   };
 

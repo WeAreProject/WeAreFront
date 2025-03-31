@@ -117,6 +117,7 @@ interface PurchaseData {
 
 export const createPurchase = async (purchaseData: PurchaseData) => {
   try {
+    console.log('Creando compra con datos:', purchaseData);
     const response = await fetch(`${BASE_URL}/purchases`, {
       method: 'POST',
       headers: {
@@ -126,12 +127,16 @@ export const createPurchase = async (purchaseData: PurchaseData) => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al crear la compra');
+      const errorData = await response.json().catch(() => null);
+      console.error('Error en la respuesta del servidor:', response.status, errorData);
+      throw new Error(errorData?.message || 'Error al crear la compra');
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Compra creada exitosamente:', data);
+    return data;
   } catch (error) {
     console.error('Error en createPurchase:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error('Error desconocido al crear la compra');
   }
 }; 

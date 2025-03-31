@@ -39,12 +39,36 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
 
   const handlePurchase = async () => {
     try {
-      await createPurchase({
-        customer_id: 11,
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        setNotification({
+          type: 'error',
+          message: 'No se encontró la información del usuario'
+        });
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
+      const customerId = userData.id;
+
+      if (!customerId) {
+        setNotification({
+          type: 'error',
+          message: 'No se encontró el ID del cliente'
+        });
+        return;
+      }
+
+      console.log('Intentando crear compra para usuario:', customerId);
+      const purchaseData = {
+        customer_id: customerId,
         service_id: Number(service.id),
         business_id: service.business_id,
         price: Number(service.price)
-      });
+      };
+      console.log('Datos de la compra:', purchaseData);
+
+      await createPurchase(purchaseData);
 
       setNotification({
         type: 'success',
@@ -55,9 +79,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, service }) => {
         onClose();
       }, 2000);
     } catch (error) {
+      console.error('Error al crear la compra:', error);
       setNotification({
         type: 'error',
-        message: 'Error al realizar la compra'
+        message: error instanceof Error ? error.message : 'Error al realizar la compra'
       });
     }
   };

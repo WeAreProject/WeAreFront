@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { Business } from "../types/business";
 
 const API_URL = "https://rest-api-weare-production.up.railway.app/api";
 
@@ -12,22 +13,6 @@ interface Service {
   image: string;
   created_at: string;
   updated_at: string;
-}
-
-interface Business {
-  id: number;
-  business_name: string;
-  owner_id: number;
-  category: string;
-  description: string;
-  email: string;
-  phone: string;
-  location: string;
-  operation_hours: string;
-  social_media_links: string;
-  tax_id: string;
-  professional_license: string;
-  image: string;
 }
 
 interface ServiceData {

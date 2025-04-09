@@ -1,16 +1,12 @@
 export interface Business {
   id: number;
-  owner_id: number;
   business_name: string;
-  category: string;
   description: string;
-  image: string;
-  email: string;
   phone: string;
+  email: string;
   operation_hours: string;
-  social_media_links: string;
-  tax_id: string;
-  professional_license: string;
+  image: string;
+  owner_id: number;
   created_at: string;
   street: string;
   neighborhood: string;

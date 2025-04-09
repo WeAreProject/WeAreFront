@@ -6,10 +6,12 @@ import Modal from "../components/Modal";
 import Header from "../components/Header";
 import { Star } from "lucide-react";
 import { geocodeAddress } from "../utils/geocoding";
+import { Business } from "../types/business";
+import { Toaster, toast } from "sonner";
 
 const BusinessDetails = () => {
   const { businessId } = useParams<{ businessId: string }>();
-  const [business, setBusiness] = useState<any | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [services, setServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,7 +24,7 @@ const BusinessDetails = () => {
 
       try {
         // Obtener negocio
-        const businessData = await getBusinessById(parseInt(businessId));
+        const businessData = await getBusinessById(parseInt(businessId)) as Business;
         setBusiness(businessData);
 
         // Obtener coordenadas
@@ -44,6 +46,8 @@ const BusinessDetails = () => {
   }, [businessId]);
 
   const handleOpenModal = (service: any) => {
+    if (!business) return;
+    
     const formattedService = {
       ...service,
       provider: {
@@ -72,6 +76,7 @@ const BusinessDetails = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6 md:p-12 lg:p-16">
+      <Toaster richColors position="bottom-center" />
       <Header />
       <main className="max-w-5xl mx-auto bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-xl shadow-xl">
         {/* Imagen del negocio */}
@@ -211,6 +216,39 @@ const BusinessDetails = () => {
           <div className="p-6">
             <h4 className="text-xl font-semibold text-gray-900 mb-2">Dirección</h4>
             <p className="text-gray-600">{`${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`}</p>
+            
+            <div className="mt-4 flex gap-3">
+              {/* Botón Copiar Dirección */}
+              <button
+                onClick={() => {
+                  const address = `${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`;
+                  navigator.clipboard.writeText(address).then(() => {
+                    toast.success("¡Dirección copiada al portapapeles!");
+                  }).catch(() => {
+                    toast.error("No se pudo copiar la dirección");
+                  });
+                }}
+                className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                Copiar Dirección
+              </button>
+
+              {/* Botón de Uber */}
+              <a
+                href="https://m.uber.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm0 3c5 0 9 4 9 9s-4 9-9 9-9-4-9-9 4-9 9-9zm.3 13.5l-.3.4v.3c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-.7l-.1-.2-3.2-3.2c-.2-.2-.2-.5 0-.7s.5-.2.7 0l2.8 2.8V6.5c0-.3.2-.5.5-.5s.5.2.5.5v10.8l2.8-2.8c.2-.2.5-.2.7 0s.2.5 0 .7l-3.3 3.2z"/>
+                </svg>
+                Pedir Uber
+              </a>
+            </div>
           </div>
         </div>
       </section>

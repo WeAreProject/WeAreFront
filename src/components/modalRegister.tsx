@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerBusiness } from "../actions/register";
-import { locationService, Country, State, City } from '../services/locationService';
 
 interface FormState {
   businessName: string;
@@ -21,25 +20,6 @@ interface FormState {
   state: string;
   postal_code: string;
   country: string;
-}
-
-interface BusinessFormData {
-  business_name: string;
-  category: string;
-  description: string;
-  email: string;
-  phone: string;
-  operation_hours: string;
-  social_media_links: string;
-  tax_id: string;
-  street: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-  image: File | null;
-  professional_license: File | null;
 }
 
 interface BusinessContactProps {

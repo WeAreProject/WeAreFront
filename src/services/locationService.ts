@@ -5,7 +5,7 @@ export interface Country {
 
 export interface State {
   name: string;
-  state_code: string;
+  code: string;
 }
 
 export interface City {
@@ -13,32 +13,37 @@ export interface City {
 }
 
 class LocationService {
-  private baseUrl = 'https://restcountries.com/v3.1';
+  private countries: Country[] = [
+    { name: 'México', code: 'MX' },
+    // ... otros países si los hay
+  ];
+
+  private states: { [key: string]: State[] } = {
+    MX: [
+      { name: 'Puebla', code: 'PUE' },
+      // ... otros estados
+    ]
+  };
+
+  private cities: { [key: string]: { [key: string]: City[] } } = {
+    MX: {
+      PUE: [
+        { name: 'Puebla' },
+        // ... otras ciudades
+      ]
+    }
+  };
 
   async getCountries(): Promise<Country[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/all`);
-      const data = await response.json();
-      return data.map((country: any) => ({
-        name: country.translations.spa?.common || country.name.common,
-        code: country.cca2
-      })).sort((a: Country, b: Country) => a.name.localeCompare(b.name));
-    } catch (error) {
-      console.error('Error fetching countries:', error);
-      return [];
-    }
+    return Promise.resolve(this.countries);
   }
 
-  async getStates(countryCode: string): Promise<State[]> {
-    // Por ahora retornamos un array vacío, más adelante podemos implementar
-    // una API específica para estados/provincias
-    return [];
+  async getStates(): Promise<State[]> {
+    return Promise.resolve(this.states['MX']); // Por ahora solo retornamos estados de México
   }
 
-  async getCities(countryCode: string, stateCode: string): Promise<City[]> {
-    // Por ahora retornamos un array vacío, más adelante podemos implementar
-    // una API específica para ciudades
-    return [];
+  async getCities(): Promise<City[]> {
+    return Promise.resolve(this.cities['MX']['PUE']); // Por ahora solo retornamos ciudades de Puebla
   }
 }
 

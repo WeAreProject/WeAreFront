@@ -6,8 +6,6 @@ import Header from "../components/Header";
 import { geocodeAddress } from "../utils/geocoding";
 import { Business } from "../types/business";
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
 const Negocio = () => {
   const [business, setBusiness] = useState<Business | null>(null);
   const [services, setServices] = useState<any[]>([]);

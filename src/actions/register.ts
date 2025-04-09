@@ -51,24 +51,41 @@ export const registerOwner = async (formData: FormData) => {
   
 export const registerBusiness = async (formData: FormData) => {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    // Asegurarse de que los archivos se envíen correctamente
+    const imageFile = formData.get('image');
+    const licenseFile = formData.get('professional_license');
+
+    if (!imageFile || !licenseFile) {
+      throw new Error('Image and professional license are required');
+    }
+
     const response = await fetch(
       "https://rest-api-weare-production.up.railway.app/api/businesses/register",
       {
         method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       }
     );
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.message || "Business registration failed");
+      const errorData = await response.json();
+      console.error('Error response:', errorData);
+      throw new Error(errorData.message || 'Business registration failed');
     }
 
-    return data;
+    const data = await response.json();
+    return { success: true, data };
   } catch (error) {
     console.error("Error registering business:", error);
-    throw error;
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
   }
 };
   

@@ -62,11 +62,14 @@ const Register = () => {
     form.append("password", formData.password);
     form.append("role", formData.role);
     console.log("Datos del formulario antes de enviar:", formData);
+    console.log("Role seleccionado:", formData.role);
+    
     if (userId) {
       console.log("ID recuperado del localStorage:", userId);
     }
-    if (formData.role === "businessOwner") {
+    if (formData.role === "owner") {
       form.append("phone", formData.phone); 
+      console.log("Agregando teléfono para owner:", formData.phone);
     }
     if (formData.role === "customer") {
       form.append("username", formData.username);
@@ -76,24 +79,42 @@ const Register = () => {
     try {
       let response;
       if (formData.role === "customer") {
+        console.log("Registrando customer...");
         response = await registerCustomer(form); 
-      } else if (formData.role === "businessOwner") {
+      } else if (formData.role === "owner") {
+        console.log("Registrando owner...");
         response = await registerOwner(form);
       }
   
-      console.log("User registered:", response);
+      console.log("Respuesta del registro:", response);
    
-   if (response && response.id) {
-    localStorage.setItem("userId", response.id); 
-  }
-  console.log(localStorage);
+      if (response && response.id) {
+        // Guardar datos del usuario en localStorage
+        const userData = {
+          id: response.id,
+          role: formData.role,
+          name: formData.full_name || formData.name,
+          email: formData.email
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("token", response.token || "dummy-token");
+        localStorage.setItem("userId", response.id);
+        
+        console.log("Datos guardados en localStorage:", userData);
+        console.log("Token guardado:", response.token);
 
-      if (formData.role === "customer") {
-        navigate("/");
-      } else if (formData.role === "businessOwner") {
-        navigate("/ModalRegister"); 
+        if (formData.role === "customer") {
+          console.log("Redirigiendo a customer a /");
+          navigate("/");
+        } else if (formData.role === "owner") {
+          console.log("Redirigiendo a owner a /ModalRegister");
+          window.location.href = "/ModalRegister";
+        }
+      } else {
+        console.error("No se recibió ID en la respuesta:", response);
       }
     } catch (err) {
+      console.error("Error durante el registro:", err);
       const errorMessage = err instanceof Error ? err.message : "An error occurred during registration";
       setError(errorMessage);
     } finally {
@@ -233,11 +254,11 @@ const Register = () => {
               className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="customer">Customer</option>
-              <option value="businessOwner">Business Owner</option>
+              <option value="owner">Business Owner</option>
             </select>
           </div>
 
-          {formData.role === "businessOwner" && (
+          {formData.role === "owner" && (
             <div>
               <label className="block text-gray-700 text-sm sm:text-base font-medium">
                 Phone

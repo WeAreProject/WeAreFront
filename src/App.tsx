@@ -33,7 +33,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   try {
     // Verificamos que el user sea un JSON válido
-    JSON.parse(user);
+    const userData = JSON.parse(user);
+    // Verificamos que el usuario tenga el rol correcto para la ruta
+    if (window.location.pathname === '/ModalRegister' && userData.role !== 'owner') {
+      console.log('Redirigiendo a home porque el usuario no es owner');
+      return <Navigate to="/" replace />;
+    }
     return <>{children}</>;
   } catch (error) {
     console.log('Error al parsear user:', error);

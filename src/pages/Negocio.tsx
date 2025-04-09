@@ -3,11 +3,17 @@ import { fetchBusinessData } from "../actions/business";
 import { getServicesByBusinessId } from "../actions/services";
 import ServiceModal from "../components/ServiceModal";
 import Header from "../components/Header";
+import { geocodeAddress } from "../utils/geocoding";
+import { Business } from "../types/business";
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
 const Negocio = () => {
-  const [business, setBusiness] = useState<any | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [services, setServices] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
   useEffect(() => {
     const getBusinessData = async () => {
@@ -25,11 +31,21 @@ const Negocio = () => {
         const businessData = await fetchBusinessData(id);
         setBusiness(businessData);
 
+        // Obtener coordenadas
+        const address = `${businessData.street}, ${businessData.neighborhood}, ${businessData.city}, ${businessData.state}, ${businessData.country}`;
+        const coords = await geocodeAddress(address);
+        setCoordinates(coords);
+
         // Obtener servicios por business_id
-        const servicesData = await getServicesByBusinessId(businessData.id);
-        setServices(servicesData);
+        try {
+          const servicesData = await getServicesByBusinessId(businessData.id);
+          setServices(servicesData);
+        } catch (error) {
+          console.log("No hay servicios registrados para este negocio");
+          setServices([]);
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching business data:", error);
       } finally {
         setLoading(false);
       }
@@ -39,17 +55,24 @@ const Negocio = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-600">Cargando...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Cargando...</div>
+      </div>
+    );
   }
 
   if (!business) {
-    return <div className="text-center text-red-500">No se encontró información del negocio.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-red-500">No se encontró información del negocio.</div>
+      </div>
+    );
   }
 
   return (
-    
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6 md:p-12 lg:p-16">
-        <Header />
+      <Header />
       <main className="max-w-5xl mx-auto bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-xl shadow-xl">
         {/* Imagen del negocio */}
         <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gray-300 flex items-center justify-center rounded-lg mb-6 overflow-hidden">
@@ -63,11 +86,11 @@ const Negocio = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-gray-800">Location</h3>
-              <p className="text-gray-600">{business.location}</p>
+              <h3 className="text-xl font-semibold text-gray-800">Ubicación</h3>
+              <p className="text-gray-600">{`${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`}</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-gray-800">Phone</h3>
+              <h3 className="text-xl font-semibold text-gray-800">Teléfono</h3>
               <p className="text-gray-600">{business.phone}</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
@@ -75,71 +98,66 @@ const Negocio = () => {
               <p className="text-gray-600">{business.email}</p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-gray-800">Operation_Hours</h3>
+              <h3 className="text-xl font-semibold text-gray-800">Horario de Operación</h3>
               <p className="text-gray-600">{business.operation_hours}</p>
             </div>
           </div>
         </div>
 
-        {/* Reseñas de clientes */}
-        <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-          <h3 className="text-xl font-semibold mb-2">Reseñas de clientes</h3>
-          <div className="text-yellow-500">★★★★★</div>
-          <p className="text-gray-600 text-sm mt-2">Absolutely amazing experience! The pictures turned out beautifully.</p>
-        </div>
+        {/* Sección de Servicios */}
+        <section className="mt-12">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Servicios</h3>
+          {services.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 text-lg">No hay servicios registrados aún.</p>
+              <p className="text-gray-500 mt-2">Puedes agregar servicios desde el panel de administración.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service) => (
+                <div
+                  key={service.id}
+                  className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => setSelectedService(service)}
+                >
+                  <h4 className="text-xl font-semibold text-gray-800">{service.service_name}</h4>
+                  <p className="text-gray-600 mt-2">{service.description}</p>
+                  <p className="text-purple-600 font-semibold mt-2">${service.price}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-        {/* WhatsApp Button */}
-        <div className="mt-6">
-          <button className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all w-full sm:w-auto">
-            WhatsApp
-          </button>
-        </div>
+        {/* Sección del Mapa */}
+        <section className="mt-12">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Ubicación</h3>
+          <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div className="aspect-video w-full">
+              {coordinates ? (
+                <iframe
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.lon - 0.01},${coordinates.lat - 0.01},${coordinates.lon + 0.01},${coordinates.lat + 0.01}&layer=mapnik&marker=${coordinates.lat},${coordinates.lon}`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="rounded-lg"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <p className="text-gray-500">Cargando mapa...</p>
+                </div>
+              )}
+            </div>
+            <div className="p-6">
+              <h4 className="text-xl font-semibold text-gray-900 mb-2">Dirección</h4>
+              <p className="text-gray-600">{`${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`}</p>
+            </div>
+          </div>
+        </section>
       </main>
-
-      {/* Servicios dinámicos */}
-      <section className="max-w-5xl mx-auto mt-12">
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Servicios</h3>
-        {services.length === 0 ? (
-          <p className="text-gray-600 text-center">No hay servicios disponibles.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => setSelectedService(service)}
-              >
-                <h4 className="text-xl font-semibold text-gray-800">{service.service_name}</h4>
-                <p className="text-gray-600 mt-2">{service.description}</p>
-                <p className="text-purple-600 font-semibold mt-2">${service.price}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Sección del Mapa */}
-      <section className="max-w-5xl mx-auto mt-12">
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800 dark:text-white">Ubicación</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-          <div className="aspect-video w-full">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.016887889519!2d-58.381592!3d-34.603722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacf9a1e56e3%3A0x3fdbd4e7e1f9e8a9!2sObelisco!5e0!3m2!1ses-419!2sar!4v1648123456789!5m2!1ses-419!2sar"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-lg"
-            />
-          </div>
-          <div className="p-6">
-            <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Dirección</h4>
-            <p className="text-gray-600 dark:text-gray-300">{business.location}</p>
-          </div>
-        </div>
-      </section>
 
       {selectedService && (
         <ServiceModal

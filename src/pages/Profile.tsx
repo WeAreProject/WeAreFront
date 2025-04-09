@@ -128,21 +128,21 @@ const Profile = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-lg shadow-lg p-6"
       >
-        <div className="flex flex-col sm:flex-row items-start gap-6">
+        <div className="flex flex-col items-center gap-6">
           {/* Imagen del usuario */}
           <img
             src={owner.image || "/path/to/default-image.jpg"}
             alt={owner.name}
-            className="w-24 h-24 rounded-full object-cover bg-gray-200"
+            className="w-32 h-32 rounded-full object-cover bg-gray-200"
           />
   
-          <div className="flex-1">
-            <div className="flex justify-between items-start flex-wrap gap-4">
+          <div className="text-center">
+            <div className="flex flex-col items-center gap-4">
               <div>
                 <h1 className="text-2xl font-bold">{owner.name}</h1>
                 <p className="text-lg text-gray-600">{owner.email}</p>
                 <p className="text-lg text-gray-600">{owner.phone}</p>
-                <div className="flex items-center mt-2">
+                <div className="flex items-center justify-center mt-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -208,28 +208,6 @@ const Profile = () => {
               </div>
             </motion.div>
           ))}
-        </div>
-      </section>
-
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold">Ubicación</h2>
-        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-          <div className="aspect-video w-full">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.016887889519!2d-58.381592!3d-34.603722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacf9a1e56e3%3A0x3fdbd4e7e1f9e8a9!2sObelisco!5e0!3m2!1ses-419!2sar!4v1648123456789!5m2!1ses-419!2sar"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-lg"
-            />
-          </div>
-          <div className="p-6">
-            <h4 className="text-xl font-semibold text-gray-900 mb-2">Dirección</h4>
-            <p className="text-gray-600">San Francisco Bay Area</p>
-          </div>
         </div>
       </section>
 

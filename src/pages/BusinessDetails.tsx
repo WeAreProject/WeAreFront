@@ -7,7 +7,7 @@ import Header from "../components/Header";
 import { Star } from "lucide-react";
 import { geocodeAddress } from "../utils/geocoding";
 import { Business } from "../types/business";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 
 const BusinessDetails = () => {
   const { businessId } = useParams<{ businessId: string }>();

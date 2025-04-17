@@ -51,10 +51,13 @@ const Header = () => {
 
       {/* Menú Lateral */}
       <nav className={`fixed top-0 left-0 h-full w-64 bg-white text-black p-6 shadow-lg flex flex-col transform transition-transform duration-300 z-50 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        {/* Botón para cerrar el menú */}
-        <button onClick={() => setIsOpen(false)} className="self-end mb-4">
-          <X className="w-6 h-6" />
-        </button>
+        {/* Header con título y botón de cierre */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-bold">We Are</h1>
+          <button onClick={() => setIsOpen(false)}>
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
         {/* Contenedor flexible para distribuir secciones */}
         <div className="flex flex-col h-full">
@@ -70,10 +73,10 @@ const Header = () => {
             <button onClick={() => handleNavigation("/mypurchases")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/mypurchases")}`}>
               <ShoppingBag className="w-5 h-5" /> <span>My purchases</span>
             </button>
-            <button onClick={() => handleNavigation("")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment")}`}>
+            <button onClick={() => handleNavigation("/payment-methods")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/payment-methods")}`}>
               <CreditCard className="w-5 h-5" /> <span>Payment Methods</span>
             </button>
-            <button onClick={() => handleNavigation("")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
+            <button onClick={() => handleNavigation("/refer")} className={`flex items-center space-x-2 p-2 rounded-lg w-full text-left ${isActive("/refer")}`}>
               <Users className="w-5 h-5" /> <span>Refer</span>
             </button>
           </div>

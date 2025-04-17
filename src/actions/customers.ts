@@ -15,7 +15,7 @@ export const fetchCustomer = async (id: number): Promise<Customer | null> => {
       throw new Error('No token found');
     }
 
-    const response = await fetch(`${API_URL}/api/customers/${id}`, {
+    const response = await fetch(`${API_URL}/customers/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

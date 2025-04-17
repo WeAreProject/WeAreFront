@@ -18,6 +18,28 @@ const BusinessDetails = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
 
+  // Función para generar la URL de Uber con la dirección del negocio
+  const getUberUrl = () => {
+    if (!business || !coordinates) return "https://m.uber.com";
+    
+    // Crear el objeto de dirección para Uber
+    const addressObject = {
+      addressLine1: business.street,
+      addressLine2: `${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`,
+      id: "", // Este ID es específico de Google Places y no lo tenemos
+      source: "SEARCH",
+      latitude: coordinates.lat,
+      longitude: coordinates.lon,
+      provider: "google_places"
+    };
+    
+    // Codificar el objeto para la URL
+    const encodedAddress = encodeURIComponent(JSON.stringify(addressObject));
+    
+    // Formato para ubicación de recogida (pickup)
+    return `https://m.uber.com/go/pickup?drop[0]=${encodedAddress}&effect=`;
+  };
+
   useEffect(() => {
     const fetchBusinessData = async () => {
       if (!businessId) return;
@@ -75,13 +97,13 @@ const BusinessDetails = () => {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 sm:p-6 md:p-12 lg:p-16">
+    <div className="bg-white min-h-screen">
       <Toaster richColors position="bottom-center" />
       <Header />
-      <main className="max-w-5xl mx-auto bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-xl shadow-xl">
+      <main className="max-w-5xl mx-auto p-6">
         {/* Imagen del negocio */}
-        <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gray-300 flex items-center justify-center rounded-lg mb-6 overflow-hidden">
-          <img src={business.image} alt={business.business_name} className="w-full h-full object-cover rounded-lg" />
+        <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 mb-6 overflow-hidden">
+          <img src={business.image} alt={business.business_name} className="w-full h-full object-cover" />
         </div>
 
         {/* Información del negocio */}
@@ -90,19 +112,19 @@ const BusinessDetails = () => {
           <p className="text-lg sm:text-xl text-gray-600">{business.description}</p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            <div>
               <h3 className="text-xl font-semibold text-gray-800">Ubicación</h3>
               <p className="text-gray-600">{`${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`}</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            <div>
               <h3 className="text-xl font-semibold text-gray-800">Teléfono</h3>
               <p className="text-gray-600">{business.phone}</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            <div>
               <h3 className="text-xl font-semibold text-gray-800">Email</h3>
               <p className="text-gray-600">{business.email}</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-md">
+            <div>
               <h3 className="text-xl font-semibold text-gray-800">Horario de Operación</h3>
               <p className="text-gray-600">{business.operation_hours}</p>
             </div>
@@ -110,7 +132,7 @@ const BusinessDetails = () => {
         </div>
 
         {/* Reseñas de clientes */}
-        <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+        <div className="mt-8">
           <h3 className="text-xl font-semibold mb-2">Reseñas de clientes</h3>
           <div className="text-yellow-500">★★★★★</div>
           <p className="text-gray-600 text-sm mt-2">Absolutely amazing experience! The pictures turned out beautifully.</p>
@@ -130,7 +152,7 @@ const BusinessDetails = () => {
       </main>
 
       {/* Servicios */}
-      <section className="max-w-5xl mx-auto mt-12">
+      <section className="max-w-5xl mx-auto mt-12 px-6">
         <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Servicios</h3>
         {services.length === 0 ? (
           <p className="text-gray-600 text-center">No hay servicios disponibles.</p>
@@ -139,7 +161,7 @@ const BusinessDetails = () => {
             {services.map((service) => (
               <div
                 key={service.id}
-                className="service-card bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300"
+                className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative h-40 w-full rounded-t-xl overflow-hidden">
                   <img
@@ -150,9 +172,7 @@ const BusinessDetails = () => {
                 </div>
 
                 <div className="p-4 space-y-2">
-                  <div 
-                    className="flex items-center space-x-3 mb-2"
-                  >
+                  <div className="flex items-center space-x-3 mb-2">
                     <div className="w-10 h-10 rounded-full overflow-hidden border">
                       <img
                         src={business.image}
@@ -192,9 +212,9 @@ const BusinessDetails = () => {
       </section>
 
       {/* Sección del Mapa */}
-      <section className="mt-12">
+      <section className="max-w-5xl mx-auto mt-12 px-6 mb-12">
         <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-gray-800">Ubicación</h3>
-        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
           <div className="aspect-video w-full">
             {coordinates ? (
               <iframe
@@ -208,7 +228,7 @@ const BusinessDetails = () => {
                 className="rounded-lg"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <div className="w-full h-full flex items-center justify-center bg-gray-50">
                 <p className="text-gray-500">Cargando mapa...</p>
               </div>
             )}
@@ -217,28 +237,10 @@ const BusinessDetails = () => {
             <h4 className="text-xl font-semibold text-gray-900 mb-2">Dirección</h4>
             <p className="text-gray-600">{`${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`}</p>
             
-            <div className="mt-4 flex gap-3">
-              {/* Botón Copiar Dirección */}
-              <button
-                onClick={() => {
-                  const address = `${business.street}, ${business.neighborhood}, ${business.city}, ${business.state}, ${business.country}`;
-                  navigator.clipboard.writeText(address).then(() => {
-                    toast.success("¡Dirección copiada al portapapeles!");
-                  }).catch(() => {
-                    toast.error("No se pudo copiar la dirección");
-                  });
-                }}
-                className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
-                Copiar Dirección
-              </button>
-
+            <div className="mt-4">
               {/* Botón de Uber */}
               <a
-                href="https://m.uber.com"
+                href={getUberUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"

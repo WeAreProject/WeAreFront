@@ -10,11 +10,13 @@ import ModalRegister from './components/modalRegister';
 import Negocio from './pages/Negocio';
 import Profile from './pages/Profile';
 import NotificationSettings from './pages/NotificationSettings';
-import ProfileSettings from './pages/ProfileSettings.tsx';
+import ProfileSettings from './pages/ProfileSettings';
 import SecuritySettings from './pages/SecuritySettings';
 import SupportSettings from './pages/SupportSettings';
 import CategoryDetails from './pages/CategoryDetails';
 import BusinessDetails from './pages/BusinessDetails';
+import PaymentMethods from './pages/PaymentMethods';
+import Refer from './pages/Refer';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const user = localStorage.getItem('user');
@@ -124,6 +126,16 @@ function App() {
       <Route path="/support-settings" element={
         <ProtectedRoute>
           <SupportSettings />
+        </ProtectedRoute>
+      } />
+      <Route path="/payment-methods" element={
+        <ProtectedRoute>
+          <PaymentMethods />
+        </ProtectedRoute>
+      } />
+      <Route path="/refer" element={
+        <ProtectedRoute>
+          <Refer />
         </ProtectedRoute>
       } />
       {/* Ruta por defecto - redirige al login */}

@@ -22,9 +22,8 @@ const Mypurchases = () => {
         }
 
         const userData = JSON.parse(userDataString);
-        console.log('Datos del usuario:', userData);
         const customerId = userData.id;
-        
+
         if (!customerId) {
           setError("No se encontró el ID del cliente en la información del usuario");
           setLoading(false);
@@ -32,10 +31,8 @@ const Mypurchases = () => {
         }
 
         const purchasesData = await getCustomerPurchases(customerId);
-        console.log('Datos de compras recibidos:', purchasesData);
         setPurchases(purchasesData);
       } catch (err) {
-        console.error('Error completo:', err);
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
         setLoading(false);
@@ -49,46 +46,21 @@ const Mypurchases = () => {
     const matchesSearch =
       purchase.service?.service_name.toLowerCase().includes(search.toLowerCase()) ||
       purchase.service_id.toString().includes(search);
-    
+
     const matchesStatus = statusFilter === "all" || purchase.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
-          <div className="text-center py-12">
-            <p className="text-gray-500">Cargando compras...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
-          <div className="text-center py-12">
-            <p className="text-red-500">{error}</p>
-            <p className="text-gray-500 mt-2">Por favor, intenta recargar la página</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header/>
-      <div className="container mx-auto max-w-6xl px-2 py-8 space-y-6 mt-16">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Mis Compras</h1>
-          <p className="text-gray-600">Ver y gestionar tu historial de compras</p>
+    <div className="min-h-screen bg-[#f7f7f7] px-4 py-6">
+      <Header />
+      <div className="max-w-md mx-auto mt-6 space-y-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-800 flex items-center gap-2">
+            🛒 Mis compras
+          </h1>
+          <p className="text-gray-500 text-sm">Ver y gestionar tu historial de compras.</p>
         </div>
 
         <SearchFilters
@@ -98,31 +70,28 @@ const Mypurchases = () => {
           onStatusChange={setStatusFilter}
         />
 
-        <div className="space-y-4">
-          {filteredPurchases.map((purchase) => {
-            console.log('Renderizando compra:', purchase);
-            return (
-              <PurchaseCard 
-                key={purchase.id} 
-                purchase={{
-                  id: purchase.id.toString(),
-                  image: purchase.service?.image || "",
-                  serviceName: purchase.service?.service_name || "",
-                  professionalName: purchase.business?.business_name || "Negocio no encontrado",
-                  date: new Date(purchase.purchase_date).toLocaleDateString(),
-                  price: parseFloat(purchase.price),
-                  status: purchase.status as "completed" | "pending" | "canceled",
-                }} 
-              />
-            );
-          })}
-          
-          {filteredPurchases.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No se encontraron compras</p>
-            </div>
-          )}
-        </div>
+        {loading ? (
+          <p className="text-center text-gray-500">Cargando compras...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : filteredPurchases.length === 0 ? (
+          <p className="text-center text-gray-400">No se encontraron compras</p>
+        ) : (
+          filteredPurchases.map((purchase) => (
+            <PurchaseCard
+              key={purchase.id}
+              purchase={{
+                id: purchase.id.toString(),
+                image: purchase.service?.image || "",
+                serviceName: purchase.service?.service_name || "",
+                professionalName: purchase.business?.business_name || "Negocio no encontrado",
+                date: new Date(purchase.purchase_date).toLocaleDateString(),
+                price: parseFloat(purchase.price),
+                status: purchase.status as "completed" | "pending" | "canceled",
+              }}
+            />
+          ))
+        )}
       </div>
     </div>
   );

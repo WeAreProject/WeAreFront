@@ -1,5 +1,6 @@
 import { QrCode, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Service } from "../../types/service";
 
 interface Customer {
@@ -18,22 +19,33 @@ interface ServiceDetailsDialogProps {
 
 const ServiceDetailsDialog = ({ onClose, service }: ServiceDetailsDialogProps) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (service?.customer_id) {
-      // Simular la carga de datos del cliente
       setTimeout(() => {
         setCustomer({
-          id: service.customer_id || 1,
+          id: service.customer_id!,
           name: "John Doe",
           avatar: "/avatar.jpg",
           email: "john@example.com",
           phone: "+1234567890",
-          created_at: "2024-01-01"
+          created_at: "2024-01-01",
         });
-      }, 1000);
+      }, 500);
     }
   }, [service]);
+
+  const handleBuyService = () => {
+    if (service) {
+      navigate("/payment-methods", {
+        state: {
+          serviceName: service.name,
+          price: service.price,
+        },
+      });
+    }
+  };
 
   if (!service) return null;
 
@@ -46,16 +58,13 @@ const ServiceDetailsDialog = ({ onClose, service }: ServiceDetailsDialogProps) =
               <h2 className="text-xl font-semibold">{service.name}</h2>
               <p className="text-sm text-gray-500">{service.category}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
               <X className="h-6 w-6" />
             </button>
           </div>
 
           {customer ? (
-            <div className="space-y-4">
+            <>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
                   <img
@@ -91,14 +100,16 @@ const ServiceDetailsDialog = ({ onClose, service }: ServiceDetailsDialogProps) =
                   onClick={onClose}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                 >
-                  Close
+                  Cerrar
                 </button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 flex items-center space-x-2">
-                  <QrCode className="w-4 h-4" />
-                  <span>Show QR Code</span>
+                <button
+                  onClick={handleBuyService}
+                  className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+                >
+                  Comprar Servicio
                 </button>
               </div>
-            </div>
+            </>
           ) : (
             <div className="flex justify-center items-center h-48">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />

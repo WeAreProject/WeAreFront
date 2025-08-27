@@ -51,4 +51,4 @@ export const loginUser = async (credentials: LoginCredentials) => {
     console.error("Error detallado:", error);
     throw error;
   }
-}; 
+};

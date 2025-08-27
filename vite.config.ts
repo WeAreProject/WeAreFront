@@ -8,11 +8,13 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://rest-api-weare-production.up.railway.app",
+        target: "http://localhost:5000", // tu backend local para desarrollo
         changeOrigin: true,
-        secure: true, // Cambia a false si el backend usa HTTPS con certificado no válido
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
+  build: {
+    outDir: "dist"
+  }
 });

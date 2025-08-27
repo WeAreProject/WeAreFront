@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,9 +16,11 @@
     "@heroicons/react": "^2.2.0",
     "@mui/material": "^6.4.8",
     "@tailwindcss/vite": "^4.0.6",
+    "express": "^5.1.0",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
+    "react-calendar": "^6.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.2.0",

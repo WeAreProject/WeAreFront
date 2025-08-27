@@ -1,123 +1,128 @@
-import { useState } from 'react';
-import Header from '../components/Header';
-import { Copy, Facebook, Mail, Twitter, Share2 } from 'lucide-react';
+import { useState } from "react";
+import Header from "../components/Header";
+import BottomNav from "../components/BottomNav";
+import { Copy, Facebook, Mail, Share2, Gift } from "lucide-react";
 
 const Refer = () => {
-  const [email, setEmail] = useState('');
-  const referralCode = 'REF123XYZ'; // Este código podría venir de una API o del estado del usuario
+  const [email, setEmail] = useState("");
+  const referralCode = "REF123XYZ";
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(referralCode);
-    // Aquí podrías agregar una notificación de "Copiado!"
   };
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar la invitación
-    setEmail('');
+    setEmail("");
   };
 
-  const stats = [
-    {
-      value: 12,
-      label: 'Total Referrals'
-    },
-    {
-      value: '$120',
-      label: 'Rewards Earned'
-    },
-    {
-      value: '$30',
-      label: 'Pending Rewards'
-    }
-  ];
-
   return (
-    <>
+    <div className="min-h-screen bg-black text-white font-sans">
       <Header />
-      <div className="container mx-auto px-4 pt-20 max-w-2xl">
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <h1 className="text-2xl font-bold text-center mb-2">Refer & Earn</h1>
-          <p className="text-gray-600 text-center mb-8">
-            Share your unique referral code with friends and earn rewards for
-            every successful referral.
+
+      <main className="pt-24 pb-32 px-4 max-w-md mx-auto">
+        <div className="rounded-3xl border border-white/20 p-6 shadow-xl bg-black">
+          <h1 className="text-3xl font-extrabold text-center mb-2">
+            Recomienda y Gana
+          </h1>
+          <p className="text-center text-white font-medium mb-1">
+            Comparte tu <span className="font-bold">código de referencia</span>
+          </p>
+          <p className="text-center text-white/60 text-sm mb-6">
+            Invita amigos y obtén recompensas exclusivas.
           </p>
 
-          {/* Referral Code Section */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <p className="text-sm text-gray-600 text-center mb-2">Your Referral Code</p>
-            <p className="text-sm text-gray-600 text-center mb-4">Share this code with your friends</p>
-            
-            <div className="flex items-center justify-center space-x-2 mb-6">
-              <code className="bg-white px-4 py-2 rounded-lg text-lg font-mono">
+          {/* Código de Referencia */}
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
+            <p className="text-sm text-white/80 font-semibold mb-3">
+              Tu código
+            </p>
+            <div className="flex items-center justify-between bg-white/20 px-4 py-3 rounded-lg shadow-inner">
+              <span className="font-bold text-lg tracking-wider">
                 {referralCode}
-              </code>
+              </span>
               <button
                 onClick={handleCopyCode}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="hover:text-cyan-300 transition"
+                title="Copiar código"
               >
-                <Copy className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Share Buttons */}
-            <div className="flex justify-center space-x-4">
-              <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
-                <Facebook className="w-5 h-5" />
-                <span>Facebook</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
-                <Mail className="w-5 h-5" />
-                <span>Email</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
-                <Twitter className="w-5 h-5" />
-                <span>X</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 rounded-lg border hover:bg-gray-50">
-                <Share2 className="w-5 h-5" />
-                <span>More</span>
+                <Copy className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg border text-center">
-                <p className="text-2xl font-bold mb-1">{stat.value}</p>
-                <p className="text-sm text-gray-600">{stat.label}</p>
+          {/* Botones de Compartir */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <button className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-sm rounded-xl py-2 transition">
+              <Facebook className="w-5 h-5" />
+              Facebook
+            </button>
+            <button className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-sm rounded-xl py-2 transition">
+              <Mail className="w-5 h-5" />
+              Email
+            </button>
+            <button className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-sm rounded-xl py-2 transition">
+              <Share2 className="w-5 h-5" />
+              Incógnito
+            </button>
+            <button className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-sm rounded-xl py-2 transition">
+              <Share2 className="w-5 h-5" />
+              Más
+            </button>
+          </div>
+
+          {/* Recompensas */}
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
+            <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+              <Gift className="w-5 h-5" /> Tus Recompensas
+            </h3>
+            <div className="flex justify-between text-sm text-white/80">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-green-300">$120</p>
+                <p>Ganadas</p>
               </div>
-            ))}
+              <div className="text-center">
+                <p className="text-2xl font-bold text-yellow-300">$30</p>
+                <p>Próxima</p>
+              </div>
+            </div>
           </div>
 
-          {/* Invite Form */}
-          <div className="bg-white rounded-lg">
-            <h3 className="font-semibold mb-2">Invite Friends</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Enter your friend's email to send them an invitation
+          {/* Invitación por correo */}
+          <div className="text-left">
+            <h3 className="font-semibold mb-1">Invitar por correo</h3>
+            <p className="text-sm text-white/70 mb-3">
+              Introduce el correo de tu amigo para enviarle una invitación.
             </p>
-            <form onSubmit={handleInvite} className="flex gap-2">
+            <form
+              onSubmit={handleInvite}
+              className="flex gap-2 flex-col sm:flex-row"
+            >
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="friend@example.com"
-                className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="amigo@ejemplo.com"
                 required
+                className="flex-1 p-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
               <button
                 type="submit"
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                className="bg-white hover:bg-gray-200 text-black px-4 py-3 rounded-lg font-semibold transition"
               >
-                Send Invite
+                Enviar
               </button>
             </form>
           </div>
         </div>
+      </main>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-black border-t border-white/20">
+        <BottomNav />
       </div>
-    </>
+    </div>
   );
 };
 
-export default Refer; 
+export default Refer;

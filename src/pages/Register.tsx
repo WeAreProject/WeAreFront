@@ -1,23 +1,21 @@
 import { useState } from "react";
-import { registerCustomer, registerOwner } from "../actions/register";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: "", 
-    name: "",     
+    full_name: "",
+    name: "",
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
-    role: "customer", 
+    role: "customer",
     termsAccepted: false,
-    image: null,
-    phone: "", 
+    phone: "",
   });
-  
+
   const [image, setImage] = useState<File | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -27,285 +25,236 @@ const Register = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type, checked, files } = target;
-    setFormData({
-      ...formData,
-      [name]:
-        type === "checkbox" ? checked : type === "file" ? files?.[0] : value,
-    });
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+    if (type === "file" && files) {
+      setImage(files[0]);
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === "checkbox" ? checked : value,
+      });
     }
   };
 
+  // Mock de registro (simulación sin backend)
+  const mockRegister = async () => {
+    return new Promise<{ id: string; token: string }>((resolve) => {
+      setTimeout(() => {
+        resolve({
+          id: Math.random().toString(36).substring(2, 10), // id fake
+          token: "dummy-token-" + Date.now(),
+        });
+      }, 1000);
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-  
+
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Las contraseñas no coinciden.");
       setLoading(false);
       return;
     }
-  
-    const form = new FormData();
-  
-    const nameField = formData.role === "customer" ? "full_name" : "name";
-    const userId = localStorage.getItem("userId");
 
-    form.append(nameField, formData.full_name || formData.name); 
-    form.append("email", formData.email);
-    form.append("password", formData.password);
-    form.append("role", formData.role);
-    console.log("Datos del formulario antes de enviar:", formData);
-    console.log("Role seleccionado:", formData.role);
-    
-    if (userId) {
-      console.log("ID recuperado del localStorage:", userId);
-    }
-    if (formData.role === "owner") {
-      form.append("phone", formData.phone); 
-      console.log("Agregando teléfono para owner:", formData.phone);
-    }
-    if (formData.role === "customer") {
-      form.append("username", formData.username);
-    }
-    if (image) form.append("image", image);
-  
     try {
-      let response;
-      if (formData.role === "customer") {
-        console.log("Registrando customer...");
-        response = await registerCustomer(form); 
-      } else if (formData.role === "owner") {
-        console.log("Registrando owner...");
-        response = await registerOwner(form);
-      }
-  
-      console.log("Respuesta del registro:", response);
-   
-      if (response && response.id) {
-        // Guardar datos del usuario en localStorage
-        const userData = {
-          id: response.id,
-          role: formData.role,
-          name: formData.full_name || formData.name,
-          email: formData.email
-        };
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", response.token || "dummy-token");
-        localStorage.setItem("userId", response.id);
-        
-        console.log("Datos guardados en localStorage:", userData);
-        console.log("Token guardado:", response.token);
+      const response = await mockRegister();
 
-        if (formData.role === "customer") {
-          console.log("Redirigiendo a customer a /");
-          navigate("/");
-        } else if (formData.role === "owner") {
-          console.log("Redirigiendo a owner a /ModalRegister");
-          window.location.href = "/ModalRegister";
-        }
+      const userData = {
+        id: response.id,
+        role: formData.role,
+        name: formData.full_name || formData.name,
+        email: formData.email,
+        username: formData.username || "",
+        phone: formData.phone || "",
+        image: image ? image.name : null, // solo guardamos el nombre del archivo
+      };
+
+      // Guardamos en localStorage
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("userId", response.id);
+
+      if (formData.role === "customer") {
+        navigate("/");
       } else {
-        console.error("No se recibió ID en la respuesta:", response);
+        navigate("/ModalRegister");
       }
     } catch (err) {
-      console.error("Error durante el registro:", err);
-      const errorMessage = err instanceof Error ? err.message : "An error occurred during registration";
-      setError(errorMessage);
+      setError("Ocurrió un error durante el registro");
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
-      <div className="bg-white p-6 sm:p-8 md:p-12 rounded-3xl shadow-xl w-full max-w-md md:max-w-lg lg:max-w-xl">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
-          Create an account
-        </h2>
-        <p className="text-gray-600 text-center mb-6 sm:mb-8 text-base sm:text-lg">
-          Enter your information to get started
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 overflow-hidden">
+      <img
+        src="/images/category-icons/1.2.jpg"
+        alt="Fondo"
+        className="absolute inset-0 w-full h-full object-cover -z-10"
+      />
+
+      <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-6">
+          <img src="/images/category-icons/WRE.png" alt="WER Logo" className="h-36" />
+        </div>
+
+        <h2 className="text-2xl font-bold text-center text-white mb-2">Crear una cuenta</h2>
+        <p className="text-sm text-center text-white mb-4">Ingresa tu información para comenzar</p>
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
           <div>
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Full Name
-            </label>
+            <label className="block font-semibold text-white">Nombre Completo</label>
             <input
               type="text"
               name="full_name"
+              placeholder="Ingrese su nombre completo"
               value={formData.full_name}
               onChange={handleChange}
-              className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Enter your full name"
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
               required
             />
           </div>
+
           <div>
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Email
-            </label>
+            <label className="block font-semibold text-white">Correo electrónico</label>
             <input
               type="email"
               name="email"
+              placeholder="Introduce tu correo electrónico"
               value={formData.email}
               onChange={handleChange}
-              className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Enter your email"
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
               required
             />
           </div>
+
           {formData.role === "customer" && (
             <div>
-              <label className="block text-gray-700 text-sm sm:text-base font-medium">
-                Username
-              </label>
+              <label className="block font-semibold text-white">Nombre de usuario</label>
               <input
                 type="text"
                 name="username"
+                placeholder="Elige un nombre de usuario"
                 value={formData.username}
                 onChange={handleChange}
-                className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Choose a username"
+                className="w-full mt-1 p-2 rounded-md bg-white text-black border"
                 required
               />
             </div>
           )}
+
+          {formData.role === "owner" && (
+            <div>
+              <label className="block font-semibold text-white">Teléfono</label>
+              <input
+                type="text"
+                name="phone"
+                placeholder="Ingrese su número de teléfono"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full mt-1 p-2 rounded-md bg-white text-black border"
+                required
+              />
+            </div>
+          )}
+
           <div>
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Profile Picture
-            </label>
+            <label className="block font-semibold text-white">Foto de perfil</label>
             <input
               type="file"
               name="image"
-              onChange={handleImageChange}
-              className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+              accept="image/*"
+              onChange={handleChange}
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
               required
             />
           </div>
+
           <div className="relative">
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Password
-            </label>
-            <div className="relative mt-2">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <label className="block font-semibold text-white">Contraseña</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Ingrese su contraseña"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-8 text-black"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+
           <div className="relative">
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Confirm Password
-            </label>
-            <div className="relative mt-2">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Confirm your password"
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <label className="block font-semibold text-white">Confirmar Contraseña</label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              placeholder="Confirme su contraseña"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-8 text-black"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+
           <div>
-            <label className="block text-gray-700 text-sm sm:text-base font-medium">
-              Role
-            </label>
+            <label className="block font-semibold text-white">Rol</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full mt-1 p-2 rounded-md bg-white text-black border"
             >
-              <option value="customer">Customer</option>
-              <option value="owner">Business Owner</option>
+              <option value="customer">Cliente</option>
+              <option value="owner">Propietario</option>
             </select>
           </div>
 
-          {formData.role === "owner" && (
-            <div>
-              <label className="block text-gray-700 text-sm sm:text-base font-medium">
-                Phone
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone || ""}
-                onChange={handleChange}
-                className="mt-2 w-full px-4 sm:px-5 py-2 sm:py-3 border rounded-xl text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter your phone number"
-                required
-              />
-            </div>
-          )}
           <div className="flex items-center">
             <input
               type="checkbox"
               name="termsAccepted"
               checked={formData.termsAccepted}
               onChange={handleChange}
-              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+              className="mr-2"
               required
             />
-            <label className="ml-3 text-gray-700 text-sm sm:text-base">
-              I accept the{" "}
-              <a href="#" className="text-purple-600 hover:underline">
-                terms and conditions
-              </a>
+            <label className="text-white">
+              Acepto los <a href="#" className="underline">términos y condiciones</a>
             </label>
           </div>
-          {error && <p className="text-red-500 text-sm sm:text-base">{error}</p>}
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <button
             type="submit"
-            className="w-full bg-purple-700 text-white py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-purple-800 transition duration-200"
+            className="w-full bg-red-600 text-white py-2 rounded-md font-semibold hover:bg-red-700"
             disabled={loading}
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Registrando..." : "Registro"}
           </button>
         </form>
-        <p className="text-center text-gray-700 text-sm sm:text-base mt-6">
-          Already have an account?{" "}
-          <button 
-            onClick={() => navigate('/login')}
-            className="text-purple-600 font-medium hover:underline"
-          >
-            Log in
+
+        <p className="text-center text-white mt-4 text-sm">
+          ¿Ya tienes una cuenta?{" "}
+          <button onClick={() => navigate("/login")} className="text-red-400 underline">
+            Acceso
           </button>
         </p>
       </div>

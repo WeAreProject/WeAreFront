@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerBusiness } from "../actions/register";
 
 interface FormState {
   businessName: string;
@@ -22,115 +21,145 @@ interface FormState {
   country: string;
 }
 
-interface BusinessContactProps {
-  prevStep: () => void;
+interface StepProps {
+  prevStep?: () => void;
   nextStep: () => void;
   formData: FormState;
   setFormData: React.Dispatch<React.SetStateAction<FormState>>;
 }
 
-interface BusinessDetailsProps {
-  prevStep: () => void;
-  nextStep: () => void;
-  formData: FormState;
-  setFormData: React.Dispatch<React.SetStateAction<FormState>>;
-}
+// Simulación de la función registerBusiness
+const registerBusiness = async (formData: FormData): Promise<{ success: boolean; error?: string }> => {
+  // Simulamos un retraso de red
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Simulamos una respuesta exitosa en el 90% de los casos
+  const success = Math.random() > 0.1;
+  
+  if (success) {
+    return { success: true };
+  } else {
+    return { success: false, error: "Error simulado: No se pudo completar el registro. Intente nuevamente." };
+  }
+};
 
-interface BusinessFormProps {
-  nextStep: () => void;
-  formData: FormState;
-  setFormData: React.Dispatch<React.SetStateAction<FormState>>;
-}
+// Estilos actualizados con fondo oscuro y elementos blancos
+const containerStyle = "relative min-h-screen w-full flex items-center justify-center px-4 py-6 overflow-hidden";
+const backgroundStyle = "absolute inset-0 w-full h-full object-cover -z-10";
+const cardStyle = "bg-transparent p-6 rounded-2xl w-full max-w-md";
+const titleStyle = "text-2xl font-bold text-center text-white mb-2";
+const subtitleStyle = "text-sm text-center text-white mb-4";
+const labelStyle = "block font-semibold text-white";
+const inputStyle = "w-full mt-1 p-2 rounded-md border border-white bg-transparent text-white placeholder-gray-300";
+const buttonPrimaryStyle = "w-full bg-red-600 text-white py-2 rounded-md font-semibold hover:bg-red-700";
+const buttonSecondaryStyle = "w-full bg-gray-700 text-white py-2 rounded-md font-semibold hover:bg-gray-600";
+const progressBarStyle = "w-full bg-gray-700 rounded-full h-2 mb-4";
+const progressFillStyle = "bg-red-600 h-2 rounded-full";
 
-const BusinessForm = ({ nextStep, formData, setFormData }: BusinessFormProps) => {
-  const [localFormData, setLocalFormData] = useState<{
-    businessName: string;
-    category: string;
-    description: string;
-  }>({
+// Componente del primer paso: Información básica
+const BusinessForm = ({ nextStep, formData, setFormData }: StepProps) => {
+  const [localFormData, setLocalFormData] = useState({
     businessName: formData.businessName,
     category: formData.category,
     description: formData.description
   });
 
   const categories = [
-    "Health", "House repairs", "Product market", "Technology",
-    "Education", "Entertainment", "Financial services", "Beauty",
-    "Car repair", "Maintenance", "Others",
+    "Salud", "Reparaciones del hogar", "Mercado de productos", "Tecnología",
+    "Educación", "Entretenimiento", "Servicios financieros", "Belleza",
+    "Reparación de autos", "Mantenimiento", "Otros",
   ];
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-    setLocalFormData({ ...localFormData, [name]: value });
-    setFormData({ ...formData, [name]: value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setLocalFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const allFieldsFilled = Object.values(localFormData).every(value => value.trim() !== "");
-  const progress = allFieldsFilled ? 25 : 0;
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-2xl lg:w-3/4">
-        <h2 className="text-4xl font-bold text-center text-gray-900">Register Your Business</h2>
-        <p className="text-gray-600 text-center mb-8 text-lg">Complete the form below to register your business</p>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-300 rounded-full h-4 mb-8">
-          <div className="bg-purple-600 h-4 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+    <div className={containerStyle}>
+      <img 
+        src="/images/category-icons/1.2.jpg" 
+        alt="Fondo" 
+        className={backgroundStyle}
+        onError={(e) => {
+          e.currentTarget.src = "https://via.placeholder.com/800x1000/1a202c/ffffff?text=Fondo+de+Pantalla";
+        }}
+      />
+      
+      <div className={cardStyle}>
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/images/category-icons/WRE.png" 
+            alt="Logo" 
+            className="h-66"
+            onError={(e) => {
+              e.currentTarget.src = "https://via.placeholder.com/200x100/374151/ffffff?text=WRE+Logo";
+            }}
+          />
         </div>
 
-        <form className="space-y-6">
+        <h2 className={titleStyle}>Registre su negocio</h2>
+        <p className={subtitleStyle}>Complete el siguiente formulario para registrar su negocio</p>
+
+        <form className="space-y-4 text-sm">
           <div>
-            <label className="block text-gray-800 font-semibold text-lg">Business Name</label>
+            <label className={labelStyle}>Nombre de la empresa</label>
             <input 
               type="text" 
               name="businessName" 
               value={localFormData.businessName} 
               onChange={handleChange}
-              className="mt-2 w-full px-5 py-4 border border-gray-300 rounded-lg text-gray-900 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" 
+              className={inputStyle}
+              placeholder="Ingrese el nombre de la empresa"
               required 
             />
           </div>
 
           <div>
-            <label className="block text-gray-800 font-semibold text-lg">Category</label>
+            <label className={labelStyle}>Categoría</label>
             <select 
               name="category" 
               value={localFormData.category} 
               onChange={handleChange}
-              className="mt-2 w-full px-5 py-4 border border-gray-300 rounded-lg text-gray-900 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" 
+              className={`${inputStyle} bg-gray-800 text-white border border-purple-500 rounded-md p-2 appearance-none focus:outline-none focus:ring-2 focus:ring-purple-400`}
               required
             >
-              <option value="">Select a category</option>
+              <option value="" className="bg-gray-800 text-white">Seleccione una categoría</option>
               {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+                <option 
+                  key={category} 
+                  value={category} 
+                  className="bg-gray-800 text-white hover:bg-purple-100 hover:text-black"
+                >
+                  {category}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-gray-800 font-semibold text-lg">Business Description</label>
+            <label className={labelStyle}>Descripción del negocio</label>
             <textarea 
               name="description" 
               value={localFormData.description} 
-              onChange={handleChange} 
-              maxLength={500} 
-              rows={5}
-              className="mt-2 w-full px-5 py-4 border border-gray-300 rounded-lg text-gray-900 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition" 
+              onChange={handleChange}
+              className={inputStyle}
+              rows={3}
+              placeholder="Describa su negocio..."
               required 
             />
-            <p className="text-right text-gray-500 text-sm">
-              {localFormData.description.length} / 500 characters
-            </p>
           </div>
 
           <button 
-            type="button" 
-            className="w-full bg-purple-700 text-white py-4 rounded-lg text-xl font-semibold hover:bg-purple-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={nextStep} 
+            type="button"
+            className={`${buttonPrimaryStyle} ${!allFieldsFilled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={nextStep}
             disabled={!allFieldsFilled}
           >
-            Next
+            Siguiente
           </button>
         </form>
       </div>
@@ -138,148 +167,144 @@ const BusinessForm = ({ nextStep, formData, setFormData }: BusinessFormProps) =>
   );
 };
 
-const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: BusinessContactProps) => {
-  const [localFormData, setLocalFormData] = useState<{
-    email: string;
-    phone: string;
-    image: File | null;
-    professional_license: File | null;
-  }>({
-    email: formData.email || '',
-    phone: formData.phone || '',
-    image: null,
-    professional_license: null
+// Componente del segundo paso: Contacto y logo
+const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: StepProps) => {
+  const [localFormData, setLocalFormData] = useState({
+    email: formData.email,
+    phone: formData.phone,
+    image: formData.image
   });
 
-  const [progress, setProgress] = useState(25);
+  const [progress, setProgress] = useState(33);
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(localFormData.email);
-    const isValidPhone = /^(\d{3}-\d{3}-\d{2}-\d{2}|\d{10})$/.test(localFormData.phone);
+    const isValidPhone = /^[\d\s+-]{10,}$/.test(localFormData.phone);
     const hasLogo = localFormData.image !== null;
 
-    if (isValidEmail && isValidPhone && hasLogo) {
-      setProgress(50);
-      setIsComplete(true);
-    } else {
-      setProgress(25);
-      setIsComplete(false);
-    }
-  }, [localFormData.email, localFormData.phone, localFormData.image]);
+    const complete = isValidEmail && isValidPhone && hasLogo;
+    setIsComplete(complete);
+    setProgress(complete ? 66 : 33);
+  }, [localFormData]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setLocalFormData(prev => ({ ...prev, [name]: value }));
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     if (file) {
       setLocalFormData(prev => ({ ...prev, image: file }));
       setFormData(prev => ({ ...prev, image: file }));
     }
   };
 
-  const handleNext = () => {
-    setFormData(prev => ({
-      ...prev,
-      email: localFormData.email,
-      phone: localFormData.phone,
-      image: localFormData.image
-    }));
-    nextStep();
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-6">
-      <div className="bg-white p-12 rounded-3xl shadow-2xl w-full max-w-3xl lg:max-w-4xl">
-        <h2 className="text-3xl font-bold text-center text-gray-900">Register your business</h2>
-        <p className="text-gray-600 text-center mb-8 text-lg">Complete the form to register your business</p>
+    <div className={containerStyle}>
+      <img 
+        src="/images/category-icons/1.2.jpg" 
+        alt="Fondo" 
+        className={backgroundStyle}
+        onError={(e) => {
+          e.currentTarget.src = "https://via.placeholder.com/800x1000/1a202c/ffffff?text=Fondo+de+Pantalla";
+        }}
+      />
+      
+      <div className={cardStyle}>
+        <h2 className={titleStyle}>Información de contacto</h2>
+        <p className={subtitleStyle}>Proporcione los datos para contactar su negocio</p>
 
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-8">
-          <div className="bg-purple-600 h-3 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+        <div className={progressBarStyle}>
+          <div className={progressFillStyle} style={{ width: `${progress}%` }} />
         </div>
 
-        <form className="space-y-8">
+        <form className="space-y-4 text-sm">
           <div>
-            <label className="block text-gray-700 font-semibold text-lg">Business Logo</label>
-            {localFormData.image ? (
-              <div className="mt-4 flex flex-col items-center">
-                <img src={URL.createObjectURL(localFormData.image)} alt="Business Logo" className="w-40 h-40 object-cover rounded-xl shadow-lg" />
-                <button
-                  type="button"
-                  onClick={() => setLocalFormData({ ...localFormData, image: null })}
-                  className="mt-3 text-red-500 text-sm hover:underline"
-                >
-                  Remove image
-                </button>
+            <label className={labelStyle}>Logotipo</label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-white border-dashed rounded-xl">
+              <div className="space-y-1 text-center text-white">
+                {localFormData.image ? (
+                  <>
+                    <img 
+                      src={URL.createObjectURL(localFormData.image)} 
+                      alt="Logo preview" 
+                      className="mx-auto h-24 w-24 object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocalFormData(prev => ({ ...prev, image: null }));
+                        setFormData(prev => ({ ...prev, image: null }));
+                      }}
+                      className="text-sm text-red-400 hover:text-red-300"
+                    >
+                      Eliminar imagen
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex text-sm">
+                      <label className="relative cursor-pointer">
+                        <span>Arrastre una imagen o haga clic</span>
+                        <input 
+                          type="file" 
+                          className="sr-only" 
+                          onChange={handleFileChange}
+                          accept="image/*"
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs">PNG, JPG hasta 2MB</p>
+                  </>
+                )}
               </div>
-            ) : (
-              <div className="mt-4 w-full h-40 flex items-center justify-center border-2 border-dashed border-gray-400 rounded-xl cursor-pointer hover:border-purple-500 transition">
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  className="hidden" 
-                  id="business-logo-upload" 
-                />
-                <label htmlFor="business-logo-upload" className="flex flex-col items-center cursor-pointer">
-                  <div className="text-gray-500 text-3xl">📸</div>
-                  <span className="text-gray-500 text-lg mt-2">Arrastra una imagen o haz clic para seleccionar</span>
-                </label>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold text-lg">Email Address</label>
-            <div className="relative mt-3">
-              <span className="absolute left-4 top-4 text-gray-500 text-xl">✉️</span>
-              <input
-                type="email"
-                name="email"
-                value={localFormData.email}
-                onChange={handleChange}
-                className="pl-12 w-full px-5 py-4 border rounded-xl text-gray-900 text-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter your email"
-                required
-              />
             </div>
           </div>
 
           <div>
-            <label className="block text-gray-700 font-semibold text-lg">Phone Number</label>
-            <div className="relative mt-3">
-              <span className="absolute left-4 top-4 text-gray-500 text-xl">📞</span>
-              <input
-                type="tel"
-                name="phone"
-                value={localFormData.phone}
-                onChange={handleChange}
-                className="pl-12 w-full px-5 py-4 border rounded-xl text-gray-900 text-lg focus:ring-2 focus:ring-purple-500"
-                placeholder="Enter your phone number"
-                required
-              />
-            </div>
+            <label className={labelStyle}>Correo electrónico</label>
+            <input
+              type="email"
+              name="email"
+              value={localFormData.email}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="ejemplo@negocio.com"
+              required
+            />
           </div>
 
-          <div className="flex justify-between">
+          <div>
+            <label className={labelStyle}>Teléfono</label>
+            <input
+              type="tel"
+              name="phone"
+              value={localFormData.phone}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="55 1234 5678"
+              required
+            />
+          </div>
+
+          <div className="flex space-x-4">
             <button
               type="button"
               onClick={prevStep}
-              className="bg-gray-500 text-white py-4 px-8 rounded-xl text-lg font-semibold hover:bg-gray-600 transition"
+              className={buttonSecondaryStyle}
             >
-              Previous
+              Anterior
             </button>
             <button
               type="button"
-              onClick={handleNext}
-              className={`py-4 px-8 rounded-xl text-lg font-semibold transition ${isComplete ? "bg-purple-700 text-white hover:bg-purple-800" : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+              onClick={nextStep}
+              className={`${buttonPrimaryStyle} ${!isComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!isComplete}
             >
-              Next
+              Siguiente
             </button>
           </div>
         </form>
@@ -288,424 +313,384 @@ const BusinessContact = ({ prevStep, nextStep, formData, setFormData }: Business
   );
 };
 
-const BusinessDetails = ({ prevStep, nextStep, formData, setFormData }: BusinessDetailsProps) => {
-  const [localFormData, setLocalFormData] = useState<{
-    operatingHours: string;
-    socialMediaLinks: string;
-    street: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    postal_code: string;
-    country: string;
-  }>({
-    operatingHours: formData.operatingHours,
-    socialMediaLinks: formData.socialMediaLinks,
+// Componente del tercer paso: Ubicación
+const BusinessLocation = ({ prevStep, nextStep, formData, setFormData }: StepProps) => {
+  const [localFormData, setLocalFormData] = useState({
     street: formData.street,
     neighborhood: formData.neighborhood,
     city: formData.city,
     state: formData.state,
     postal_code: formData.postal_code,
-    country: formData.country
+    country: formData.country,
+    operatingHours: formData.operatingHours,
+    socialMediaLinks: formData.socialMediaLinks
   });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    const complete = localFormData.street.trim() !== "" && 
+                    localFormData.neighborhood.trim() !== "" && 
+                    localFormData.city.trim() !== "" && 
+                    localFormData.state.trim() !== "" && 
+                    localFormData.postal_code.trim() !== "" && 
+                    localFormData.country.trim() !== "" &&
+                    localFormData.operatingHours.trim() !== "";
+    setIsComplete(complete);
+  }, [localFormData]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setLocalFormData(prev => ({ ...prev, [name]: value }));
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNext = () => {
-    setFormData(prev => ({
-      ...prev,
-      operatingHours: localFormData.operatingHours,
-      socialMediaLinks: localFormData.socialMediaLinks,
-      street: localFormData.street,
-      neighborhood: localFormData.neighborhood,
-      city: localFormData.city,
-      state: localFormData.state,
-      postal_code: localFormData.postal_code,
-      country: localFormData.country
-    }));
-    nextStep();
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-center text-gray-900">Registra tu Negocio</h2>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-            <div className="bg-purple-600 h-2 rounded-full" style={{ width: '50%' }}></div>
-          </div>
+    <div className={containerStyle}>
+      <img 
+        src="/images/category-icons/1.2.jpg" 
+        alt="Fondo" 
+        className={backgroundStyle}
+        onError={(e) => {
+          e.currentTarget.src = "https://via.placeholder.com/800x1000/1a202c/ffffff?text=Fondo+de+Pantalla";
+        }}
+      />
+      
+      <div className={cardStyle}>
+        <h2 className={titleStyle}>Ubicación del negocio</h2>
+        <p className={subtitleStyle}>Proporcione la ubicación física de su negocio</p>
+
+        <div className={progressBarStyle}>
+          <div className={progressFillStyle} style={{ width: '100%' }} />
         </div>
 
-        <div className="p-6">
-          <form className="space-y-6">
+        <form className="space-y-4 text-sm">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Ubicación del Negocio</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">País</label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={localFormData.country}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa el país"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado/Provincia</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={localFormData.state}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa el estado o provincia"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={localFormData.city}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa la ciudad"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Colonia</label>
-                  <input
-                    type="text"
-                    name="neighborhood"
-                    value={localFormData.neighborhood}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa la colonia"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Calle</label>
-                  <input
-                    type="text"
-                    name="street"
-                    value={localFormData.street}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa la calle"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
-                  <input
-                    type="text"
-                    name="postal_code"
-                    value={localFormData.postal_code}
-                    onChange={handleChange}
-                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                    placeholder="Ingresa el código postal"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Horario de Operación</label>
+              <label className={labelStyle}>País</label>
               <input
                 type="text"
-                name="operatingHours"
-                value={localFormData.operatingHours}
+                name="country"
+                value={localFormData.country}
                 onChange={handleChange}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                placeholder="Ej: Lunes a Viernes: 9:00 AM - 5:00 PM"
+                className={inputStyle}
+                placeholder="México"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Redes Sociales (opcional)</label>
+              <label className={labelStyle}>Estado</label>
               <input
                 type="text"
-                name="socialMediaLinks"
-                value={localFormData.socialMediaLinks}
+                name="state"
+                value={localFormData.state}
                 onChange={handleChange}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-purple-500 focus:ring-purple-500"
-                placeholder="Ej. https://facebook.com/tu-negocio"
+                className={inputStyle}
+                placeholder="Ciudad de México"
+                required
               />
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Anterior
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                Siguiente
-              </button>
+            <div>
+              <label className={labelStyle}>Ciudad</label>
+              <input
+                type="text"
+                name="city"
+                value={localFormData.city}
+                onChange={handleChange}
+                className={inputStyle}
+                placeholder="Ciudad de México"
+                required
+              />
             </div>
-          </form>
-        </div>
+
+            <div>
+              <label className={labelStyle}>Colonia</label>
+              <input
+                type="text"
+                name="neighborhood"
+                value={localFormData.neighborhood}
+                onChange={handleChange}
+                className={inputStyle}
+                placeholder="Roma Norte"
+                required
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className={labelStyle}>Calle y número</label>
+              <input
+                type="text"
+                name="street"
+                value={localFormData.street}
+                onChange={handleChange}
+                className={inputStyle}
+                placeholder="Av. Paseo de la Reforma 123"
+                required
+              />
+            </div>
+
+            <div>
+              <label className={labelStyle}>Código Postal</label>
+              <input
+                type="text"
+                name="postal_code"
+                value={localFormData.postal_code}
+                onChange={handleChange}
+                className={inputStyle}
+                placeholder="06700"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelStyle}>Horario de operación</label>
+            <input
+              type="text"
+              name="operatingHours"
+              value={localFormData.operatingHours}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="Lunes a Viernes: 9:00 - 18:00"
+              required
+            />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Redes sociales (opcional)</label>
+            <input
+              type="text"
+              name="socialMediaLinks"
+              value={localFormData.socialMediaLinks}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="https://facebook.com/tunegocio"
+            />
+          </div>
+
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={prevStep}
+              className={buttonSecondaryStyle}
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={nextStep}
+              className={`${buttonPrimaryStyle} ${!isComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!isComplete}
+            >
+              Siguiente
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-const BusinessVerification = ({ prevStep, formData, setFormData }: { 
-  prevStep: () => void; 
-  formData: any;
-  setFormData: (data: any) => void;
-}) => {
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-
+// Componente del cuarto paso: Verificación
+const BusinessVerification = ({ prevStep, formData, setFormData }: StepProps) => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [localFormData, setLocalFormData] = useState({
-    taxID: "",
-    document: null as File | null,
-    previewDocument: "",
-    termsAccepted: false
+    taxID: formData.taxID,
+    professional_license: formData.professional_license,
+    termsAccepted: formData.termsAccepted,
+    previewDoc: ""
   });
-  const [progress, setProgress] = useState(75);
+
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const isValidTaxID = localFormData.taxID.trim().length > 0;
-    const hasDocument = localFormData.document !== null;
-    const acceptedTerms = localFormData.termsAccepted;
-    
-    if (isValidTaxID && hasDocument && acceptedTerms) {
-      setProgress(100);
-      setIsComplete(true);
-    } else {
-      setProgress(75);
-      setIsComplete(false);
-    }
+    const complete = localFormData.taxID.trim() !== "" && 
+                   localFormData.professional_license !== null && 
+                   localFormData.termsAccepted;
+    setIsComplete(complete);
   }, [localFormData]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-    setLocalFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
-    setFormData((prev: any) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    const val = type === 'checkbox' ? checked : value;
+    setLocalFormData(prev => ({ ...prev, [name]: val }));
+    setFormData(prev => ({ ...prev, [name]: val }));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     if (file) {
-      setLocalFormData({ ...localFormData, document: file, previewDocument: URL.createObjectURL(file) });
-      setFormData((prev: any) => ({ ...prev, professional_license: file }));
+      setLocalFormData(prev => ({ 
+        ...prev, 
+        professional_license: file,
+        previewDoc: URL.createObjectURL(file)
+      }));
+      setFormData(prev => ({ ...prev, professional_license: file }));
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Obtener el owner_id del localStorage
-      const userData = localStorage.getItem('user');
-      if (!userData) {
-        throw new Error('No se encontró la información del usuario');
-      }
-      
-      const user = JSON.parse(userData);
-      if (!user.id) {
-        throw new Error('No se encontró el ID del usuario');
-      }
-
+      // Crear FormData para enviar
       const formDataToSend = new FormData();
       
-      // Agregar el owner_id primero
-      formDataToSend.append('owner_id', user.id.toString());
-      
-      // Agregar todos los campos del formulario
-      formDataToSend.append('business_name', formData.businessName.trim());
-      formDataToSend.append('category', formData.category.trim());
-      formDataToSend.append('description', formData.description.trim());
-      formDataToSend.append('email', formData.email.trim());
-      formDataToSend.append('phone', formData.phone.trim());
-      formDataToSend.append('operation_hours', formData.operatingHours.trim());
-      formDataToSend.append('social_media_links', formData.socialMediaLinks.trim());
-      formDataToSend.append('tax_id', localFormData.taxID.trim());
-      formDataToSend.append('street', formData.street.trim());
-      formDataToSend.append('neighborhood', formData.neighborhood.trim());
-      formDataToSend.append('city', formData.city.trim());
-      formDataToSend.append('state', formData.state.trim());
-      formDataToSend.append('postal_code', formData.postal_code.trim());
-      formDataToSend.append('country', formData.country.trim());
-
-      // Verificar que los archivos existan antes de enviarlos
-      if (!localFormData.document || !formData.image) {
-        throw new Error('Image and professional license are required');
-      }
-
-      // Agregar archivos
-      formDataToSend.append('professional_license', localFormData.document);
-      formDataToSend.append('image', formData.image);
-
-      // Verificar que todos los campos requeridos estén presentes
-      const requiredFields = [
-        'owner_id', 'business_name', 'category', 'description', 'email', 
-        'phone', 'operation_hours', 'street', 'neighborhood', 'city', 
-        'state', 'postal_code', 'country', 'tax_id'
-      ];
-
-      for (const field of requiredFields) {
-        const value = formDataToSend.get(field);
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          throw new Error(`El campo ${field} es requerido`);
+      // Agregar todos los campos al formData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formDataToSend.append(key, value);
+        } else if (value !== null && value !== undefined) {
+          formDataToSend.append(key, String(value));
         }
-      }
-
-      // Mostrar los datos que se van a enviar
-      const formDataObj: any = {};
-      formDataToSend.forEach((value, key) => {
-        formDataObj[key] = value instanceof File ? value.name : value;
       });
-      console.log('FormData siendo enviado:', formDataObj);
-    
+
+      // Usar la función simulada registerBusiness
       const response = await registerBusiness(formDataToSend);
+      
       if (response.success) {
-        console.log('Negocio registrado exitosamente:', response.data);
-        // Redireccionar a la página de inicio
+        // Simulación exitosa - redirigir a página principal
+        alert("¡Registro completado con éxito! (simulación)");
         navigate('/');
       } else {
-        console.error('Error al registrar el negocio:', response.error);
-        // Aquí podrías mostrar un mensaje de error al usuario
+        console.error('Error al registrar:', response.error);
+        alert(response.error || 'Ocurrió un error al registrar. Por favor intente nuevamente.');
       }
     } catch (error) {
-      console.error('Error en el envío del formulario:', error);
-      // Aquí podrías mostrar un mensaje de error al usuario
+      console.error('Error:', error);
+      alert('Error en el servidor. Por favor intente más tarde.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 sm:px-8">
-      <div className="bg-white p-10 sm:p-12 md:p-16 rounded-2xl shadow-lg w-full max-w-4xl">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-6">Register Your Business</h2>
-        <p className="text-gray-600 text-center mb-8">Complete the form below to register your business</p>
-        
-        {/* Barra de progreso */}
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-8">
-          <div className="bg-purple-600 h-3 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+    <div className={containerStyle}>
+      <img 
+        src="/images/category-icons/1.2.jpg" 
+        alt="Fondo" 
+        className={backgroundStyle}
+        onError={(e) => {
+          e.currentTarget.src = "https://via.placeholder.com/800x1000/1a202c/ffffff?text=Fondo+de+Pantalla";
+        }}
+      />
+      
+      <div className={cardStyle}>
+        <h2 className={titleStyle}>Verificación final</h2>
+        <p className={subtitleStyle}>Complete la información fiscal y legal</p>
+
+        <div className={progressBarStyle}>
+          <div className={progressFillStyle} style={{ width: '100%' }} />
         </div>
 
-        <form className="space-y-8">
-          {/* Tax ID */}
+        <form className="space-y-4 text-sm" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-xl font-medium text-gray-700">Tax ID (RFC)</label>
-            <input 
-              type="text" 
-              name="taxID" 
-              value={localFormData.taxID} 
-              onChange={handleChange} 
-              className="w-full px-5 py-4 border rounded-lg text-gray-900 focus:ring-2 focus:ring-purple-500 text-xl" 
-              placeholder="Enter your tax ID" 
-              required 
+            <label className={labelStyle}>RFC</label>
+            <input
+              type="text"
+              name="taxID"
+              value={localFormData.taxID}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="XAXX010101000"
+              required
             />
-            {!localFormData.taxID && <p className="text-red-500 text-sm mt-2">Tax ID is required</p>}
           </div>
 
-          {/* Document Upload */}
           <div>
-            <label className="block text-xl font-medium text-gray-700">Professional License/Certification</label>
-            {localFormData.previewDocument ? (
-              <div className="mt-4 flex flex-col items-center">
-                <embed src={localFormData.previewDocument} className="w-full h-48 object-cover rounded-lg shadow" />
-                <button type="button" onClick={() => setLocalFormData({ ...localFormData, document: null, previewDocument: "" })} className="mt-2 text-red-500 text-sm hover:underline">
-                  Remove document
-                </button>
-              </div>
-            ) : (
-              <div className="mt-4 w-full h-40 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition">
-                <input type="file" accept="application/pdf,image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
-                <label htmlFor="file-upload" className="flex flex-col items-center cursor-pointer">
-                  <div className="text-4xl text-gray-500">📂</div>
-                  <span className="text-gray-500 text-xl">Drag and drop an image, or click to select</span>
-                </label>
-              </div>
-            )}
-          </div>
-
-          {/* Terms and Conditions */}
-          <div className="flex items-start">
-            <input type="checkbox" name="termsAccepted" checked={localFormData.termsAccepted} onChange={handleChange} className="w-6 h-6 mt-1" />
-            <label className="ml-4 text-lg text-gray-700">I agree to the terms and conditions</label>
-          </div>
-          {!localFormData.termsAccepted && <p className="text-red-500 text-sm mt-2">You must accept the terms and conditions</p>}
-
-          {/* Buttons */}
-          <div className="flex justify-between mt-8">
-            <button 
-              type="button" 
-              onClick={prevStep} 
-              className="bg-gray-500 text-white py-4 px-8 rounded-lg font-semibold hover:bg-gray-600 transition w-full sm:w-auto"
-              disabled={isLoading}
-            >
-              Previous
-            </button>
-            <button 
-              type="button" 
-              onClick={isComplete ? handleSubmit : undefined} 
-              className={`py-4 px-8 rounded-lg font-semibold transition w-full sm:w-auto relative
-                ${isComplete && !isLoading
-                  ? "bg-purple-700 text-white hover:bg-purple-800"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"}`} 
-              disabled={!isComplete || isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  <span>Registrando...</span>
-                </div>
-              ) : (
-                "Submit & Verify"
-              )}
-            </button>
-          </div>
-        </form>
-
-        {/* Overlay de carga */}
-        {isLoading && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full mx-4">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Registrando tu negocio</h3>
-                <p className="text-gray-600 text-center">Por favor, espera mientras procesamos tu registro...</p>
+            <label className={labelStyle}>Licencia profesional</label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-white border-dashed rounded-xl">
+              <div className="space-y-1 text-center text-white">
+                {localFormData.previewDoc ? (
+                  <>
+                    <div className="mx-auto h-24 flex items-center">
+                      <span>Documento cargado</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocalFormData(prev => ({ 
+                          ...prev, 
+                          professional_license: null,
+                          previewDoc: ""
+                        }));
+                        setFormData(prev => ({ ...prev, professional_license: null }));
+                      }}
+                      className="text-sm text-red-400 hover:text-red-300"
+                    >
+                      Eliminar documento
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex text-sm">
+                      <label className="relative cursor-pointer">
+                        <span>Arrastre un documento o haga clic</span>
+                        <input 
+                          type="file" 
+                          className="sr-only" 
+                          onChange={handleFileChange}
+                          accept=".pdf,.jpg,.png"
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs">PDF, JPG o PNG hasta 5MB</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        )}
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              name="termsAccepted"
+              checked={localFormData.termsAccepted}
+              onChange={handleChange}
+              className="mr-2"
+              required
+            />
+            <label className="text-white">
+              Acepto los <a href="#" className="underline">términos y condiciones</a>
+            </label>
+          </div>
+
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={prevStep}
+              className={buttonSecondaryStyle}
+              disabled={isLoading}
+            >
+              Anterior
+            </button>
+            <button
+              type="submit"
+              className={`${buttonPrimaryStyle} ${!isComplete || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!isComplete || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </>
+              ) : 'Registrar negocio'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
+// Componente contenedor principal
 const ModalRegister = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormState>({
@@ -728,16 +713,16 @@ const ModalRegister = () => {
     country: ""
   });
 
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+  const nextStep = () => setStep(prev => prev + 1);
+  const prevStep = () => setStep(prev => prev - 1);
 
   return (
-    <div>
+    <>
       {step === 1 && <BusinessForm nextStep={nextStep} formData={formData} setFormData={setFormData} />}
       {step === 2 && <BusinessContact prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
-      {step === 3 && <BusinessDetails prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
+      {step === 3 && <BusinessLocation prevStep={prevStep} nextStep={nextStep} formData={formData} setFormData={setFormData} />}
       {step === 4 && <BusinessVerification prevStep={prevStep} formData={formData} setFormData={setFormData} />}
-    </div>
+    </>
   );
 };
 

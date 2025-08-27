@@ -4,60 +4,79 @@ import SettingsSidebar from "../components/SettingsSidebar";
 import { fetchCustomer } from "../actions/customers";
 import { fetchOwner } from "../actions/owners";
 import {
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
   FaInstagram,
+  FaFacebook,
+  FaMapMarkerAlt,
+  FaWhatsapp,
+  FaGlobe,
+  FaEnvelope,
+  FaShareAlt,
   FaCamera,
   FaUpload,
-  FaPen
+  FaStar,
+  FaChevronRight,
 } from "react-icons/fa";
+import BottomNav from "../components/BottomNav";
+import { useNavigate } from "react-router-dom";
+
+interface ExtendedUser {
+  id: string;
+  role: string;
+  name?: string;
+  image?: string;
+  profession?: string;
+  coverPhoto?: string;
+  bio?: string;
+}
 
 const ProfileSettings = () => {
-  const [userData, setUserData] = useState<any | null>(null);
+  const [userData, setUserData] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState<string>("/default-cover.jpg");
   const [galleryPhotos, setGalleryPhotos] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUserData = async () => {
-      const userDataStr = localStorage.getItem("user");
-
-      if (!userDataStr) {
-        setLoading(false);
-        setError("No user data found in localStorage");
-        return;
-      }
-
       try {
-        const userData = JSON.parse(userDataStr);
-        setLoading(true);
-        setError(null);
+        const userDataStr = localStorage.getItem("user");
+        const savedCover = localStorage.getItem("coverPhoto");
+        const savedImage = localStorage.getItem("profilePhoto");
+        const savedGallery = localStorage.getItem("galleryPhotos");
 
-        try {
-          let data;
-          if (userData.role === 'owner') {
-            data = await fetchOwner(userData.id);
-          } else {
-            data = await fetchCustomer(userData.id);
-          }
-
-          if (data) {
-            setUserData(data);
-            if (data.coverPhoto) setCoverPhoto(data.coverPhoto);
-            if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
-          } else {
-            setUserData(userData);
-          }
-        } catch (apiError) {
-          setUserData(userData);
-          setError("No se pudo conectar con el servidor. Usando datos locales.");
+        if (!userDataStr) {
+          setError("No user data found in localStorage");
+          setLoading(false);
+          return;
         }
-      } catch (parseError) {
-        setError("Error al procesar los datos del usuario");
+
+        const userData = JSON.parse(userDataStr);
+
+        let data;
+        if (userData.role === "owner") {
+          data = await fetchOwner(userData.id);
+        } else {
+          data = await fetchCustomer(userData.id);
+        }
+
+        const mergedData = {
+          ...data,
+          coverPhoto: savedCover || data?.coverPhoto || "/default-cover.jpg",
+          image: savedImage || data?.image || "/default-profile.jpg",
+        };
+
+        setUserData(mergedData);
+        setCoverPhoto(mergedData.coverPhoto);
+
+        if (savedGallery) {
+          setGalleryPhotos(JSON.parse(savedGallery));
+        }
+        setError(null);
+      } catch (err) {
+        console.error(err);
+        setError("Error al cargar los datos del usuario");
       } finally {
         setLoading(false);
       }
@@ -66,153 +85,162 @@ const ProfileSettings = () => {
     loadUserData();
   }, []);
 
-  const handleCoverPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setUploading(true);
-      const file = e.target.files[0];
       const reader = new FileReader();
-
       reader.onload = (event) => {
         if (event.target?.result) {
-          setCoverPhoto(event.target.result as string);
-          setTimeout(() => setUploading(false), 1000);
+          const newCover = event.target.result as string;
+          setCoverPhoto(newCover);
+          localStorage.setItem("coverPhoto", newCover);
         }
       };
-
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploading(true);
-      const files = Array.from(e.target.files);
-      const newPhotos: string[] = [];
+  const handleProfilePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const newProfile = event.target.result as string;
+          setUserData((prev) => ({ ...prev!, image: newProfile }));
+          localStorage.setItem("profilePhoto", newProfile);
+        }
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
 
-      const readFile = (file: File): Promise<string> => {
-        return new Promise((resolve) => {
+  const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files).slice(0, 5 - galleryPhotos.length);
+      const promises = files.map(file => {
+        return new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = (event) => resolve(event.target?.result as string);
+          reader.onerror = reject;
           reader.readAsDataURL(file);
         });
-      };
+      });
 
-      for (const file of files) {
-        const photo = await readFile(file);
-        newPhotos.push(photo);
+      Promise.all(promises)
+        .then(newPhotos => {
+          const updated = [...galleryPhotos, ...newPhotos].slice(0, 5);
+          setGalleryPhotos(updated);
+          localStorage.setItem("galleryPhotos", JSON.stringify(updated));
+        })
+        .catch(err => console.error(err));
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+      if ((navigator as any).share) {
+        await (navigator as any).share({
+          title: userData?.name || "Perfil",
+          text: "Mira este perfil",
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        alert("Enlace copiado al portapapeles");
       }
-
-      setGalleryPhotos([...galleryPhotos, ...newPhotos]);
-      setTimeout(() => setUploading(false), 1000);
+      setMoreOpen(false);
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const openSocialMedia = (platform: string) => {
-    let url = "";
-    switch (platform) {
-      case "facebook":
-        url = "https://facebook.com";
-        break;
-      case "twitter":
-        url = "https://twitter.com";
-        break;
-      case "linkedin":
-        url = "https://linkedin.com";
-        break;
-      case "instagram":
-        url = "https://instagram.com";
-        break;
-    }
-    window.open(url, "_blank");
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header />
-        <div className="flex flex-col p-4">
-          <SettingsSidebar />
-          <div className="flex-1 p-4 mt-4 flex items-center justify-center">
-            <div className="text-center text-gray-600">Cargando...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header />
-        <div className="flex flex-col p-4">
-          <SettingsSidebar />
-          <div className="flex-1 p-4 mt-4">
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700">{error}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!userData) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header />
-        <div className="flex flex-col p-4">
-          <SettingsSidebar />
-          <div className="flex-1 p-4 mt-4 flex items-center justify-center">
-            <div className="text-center text-red-500">No se pudo cargar el perfil del usuario.</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="text-center p-6">Cargando...</div>;
+  if (error) return <div className="text-center text-red-600 p-6">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      <div className="flex flex-col p-4">
-        <SettingsSidebar />
+    <div className="min-h-screen bg-white relative pb-24">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-white">
+        <Header />
+      </div>
 
-        <div className="flex-1 flex flex-col items-center bg-white shadow-md rounded-2xl p-6 relative mt-4">
-          {/* Portada */}
-          <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-gray-200">
-            <div
-              className="w-full h-full"
-              style={{ backgroundImage: coverPhoto ? `url(${coverPhoto})` : "none" }}
-            >
-              {!coverPhoto && (
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600"></div>
-              )}
-            </div>
-            <label className="absolute bottom-2 right-2 bg-white p-1 rounded-full shadow cursor-pointer hover:bg-gray-100">
-              <FaCamera className="text-gray-700 text-sm" />
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleCoverPhotoUpload}
+      <div className="mt-16 sm:mt-20 lg:mt-0"></div>
+
+      <div className="flex flex-col lg:flex-row lg:p-6 p-3 gap-4">
+        <aside className="hidden lg:block lg:w-1/4">
+          <SettingsSidebar />
+        </aside>
+
+        <main
+          className="relative flex-1 flex flex-col items-center shadow-md rounded-2xl p-4 pb-16 bg-white
+                     max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl mx-auto w-full"
+        >
+          {/* Opciones */}
+          <button
+            aria-label="Más opciones"
+            onClick={() => setMoreOpen((v) => !v)}
+            className="absolute top-2 left-2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow flex items-center justify-center active:scale-95"
+          >
+            <FaChevronRight className="text-gray-700" />
+          </button>
+
+          {moreOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-30 bg-black/20"
+                onClick={() => setMoreOpen(false)}
               />
+              <div className="absolute top-12 left-2 z-40 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden">
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                  onClick={() => {
+                    navigate("/calendar", { state: { person: userData } });
+                    setMoreOpen(false);
+                  }}
+                >
+                  Agendar cita
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                  onClick={() => {
+                    navigate("/chat", { state: { person: userData } });
+                    setMoreOpen(false);
+                  }}
+                >
+                  Enviar mensaje
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                  onClick={handleShare}
+                >
+                  Compartir perfil
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Portada */}
+          <div className="relative w-full h-44 sm:h-52 md:h-56 bg-gray-200 overflow-hidden rounded-b-2xl">
+            <div
+              className="absolute inset-0 z-0"
+              style={{
+                backgroundImage: `url(${coverPhoto})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+            <label className="absolute top-2 right-2 z-10 bg-white p-2 rounded-full shadow cursor-pointer hover:bg-gray-100">
+              <FaCamera className="text-gray-700 text-md" />
+              <input type="file" className="hidden" accept="image/*" onChange={handleCoverPhotoUpload} />
             </label>
           </div>
 
-          {/* Foto de perfil */}
-          <div className="relative -mt-16">
+          {/* Foto perfil */}
+          <div className="relative -mt-14 sm:-mt-16 z-10">
             <img
-              src={userData?.image || "https://i.pinimg.com/736x/b1/6c/f3/b16cf30a73e39f9b8819bd9b61ff6b09.jpg"}
+              src={userData?.image || "/default-profile.jpg"}
               alt="Profile"
-              className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg"
+              className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white object-cover shadow-lg mx-auto"
             />
             <label className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow cursor-pointer hover:bg-gray-100">
               <FaCamera className="text-gray-700 text-sm" />
@@ -220,126 +248,104 @@ const ProfileSettings = () => {
                 type="file"
                 className="hidden"
                 accept="image/*"
-                onChange={handleCoverPhotoUpload}
+                onChange={handleProfilePhotoUpload}
               />
             </label>
           </div>
 
-          {/* Info usuario */}
-          <div className="text-center mt-4 w-full">
-            <h2 className="text-xl font-semibold">{userData?.name || userData?.full_name || "John Doe"}</h2>
-            <p className="text-gray-500">{userData?.profession || "Abogado"}</p>
-
-            <div className="flex items-center justify-center my-2">
-              <span className="text-yellow-400">★ ★ ★ ★ ☆</span>
-              <span className="ml-2 text-gray-600">4.0</span>
+          {/* Nombre */}
+          <div className="w-full flex flex-col items-center mt-2">
+            <h2 className="text-lg sm:text-xl font-semibold text-center">{userData?.name || "Carlos Martinez"}</h2>
+            <div className="w-full max-w-[220px] mt-1 flex justify-between px-2">
+              <p className="text-gray-600 text-xs sm:text-sm">{userData?.profession || "Fotógrafo"}</p>
+              <div className="flex items-center text-yellow-500 text-xs sm:text-sm">
+                <FaStar className="text-xs" />
+                <span className="ml-1 text-gray-700 font-semibold">4.9</span>
+              </div>
             </div>
+          </div>
 
-            <div className="mb-3">
-              <span className="text-gray-700 font-medium">200 seguidores</span>
+          {/* Redes sociales */}
+          <div className="flex flex-col items-center gap-2 my-4">
+            <div className="flex gap-3">
+              <IconBtn icon={<FaInstagram size={18} />} />
+              <IconBtn icon={<FaFacebook size={18} />} />
+              <IconBtn icon={<FaMapMarkerAlt size={18} />} />
             </div>
+            <div className="flex gap-3">
+              <IconBtn icon={<FaWhatsapp size={18} />} />
+              <IconBtn icon={<FaGlobe size={18} />} />
+              <IconBtn icon={<FaShareAlt size={18} />} />
+              {/* Uber como imagen */}
+              <IconBtnImg 
+                url="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" 
+                alt="Uber" 
+              />
+            </div>
+          </div>
 
-            <div className="flex justify-center space-x-4 mb-6">
-              <button onClick={() => openSocialMedia("facebook")} className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"><FaFacebook size={14} /></button>
-              <button onClick={() => openSocialMedia("twitter")} className="p-2 bg-blue-400 text-white rounded-full hover:bg-blue-500"><FaTwitter size={14} /></button>
-              <button onClick={() => openSocialMedia("linkedin")} className="p-2 bg-blue-700 text-white rounded-full hover:bg-blue-800"><FaLinkedin size={14} /></button>
-              <button onClick={() => openSocialMedia("instagram")} className="p-2 bg-pink-600 text-white rounded-full hover:bg-pink-700"><FaInstagram size={14} /></button>
-            </div>
+          {/* Bio */}
+          <div className="w-full px-4">
+            <p className="text-xs sm:text-sm text-gray-700 text-center">
+              {userData?.bio || "Este usuario aún no ha escrito una biografía."}
+            </p>
           </div>
 
           {/* Galería */}
-          <div className="w-full mt-6">
+          <div className="w-full px-4 mt-4">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-left font-semibold text-red-600">Fotos</p>
-              <label className="flex items-center px-3 py-1 bg-gray-800 text-white rounded-lg cursor-pointer hover:bg-gray-700 text-sm">
-                <FaUpload className="mr-1" size={12} />
-                Subir
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  multiple
-                  onChange={handleGalleryUpload}
-                />
-              </label>
+              <p className="font-semibold text-red-600 text-sm sm:text-base">Fotos</p>
+              {galleryPhotos.length < 5 && (
+                <label className="flex items-center px-2 py-1 bg-gray-800 text-white rounded-md cursor-pointer hover:bg-gray-700 text-xs sm:text-sm">
+                  <FaUpload className="mr-1" size={12} />
+                  Subir
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleGalleryUpload}
+                  />
+                </label>
+              )}
             </div>
-
             {galleryPhotos.length > 0 ? (
-              <div className="flex space-x-2 overflow-x-auto">
+              <div className="flex space-x-2 overflow-x-auto pb-2">
                 {galleryPhotos.map((photo, index) => (
-                  <div key={index} className="min-w-[80px] h-20 flex-shrink-0">
-                    <img
-                      src={photo}
-                      alt={`Gallery ${index}`}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
+                  <img
+                    key={index}
+                    src={photo}
+                    alt={`Gallery ${index}`}
+                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shadow-sm"
+                  />
                 ))}
               </div>
             ) : (
-              <div className="bg-gray-100 rounded-lg p-6 text-center">
-                <p className="text-gray-500 text-sm">No hay fotos todavía</p>
+              <div className="bg-gray-100 rounded-lg p-3 text-center">
+                <p className="text-gray-500 text-xs sm:text-sm">No hay fotos todavía</p>
               </div>
             )}
           </div>
-
-          {/* Edición del perfil */}
-          <div className="w-full mt-8">
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-lg font-semibold text-gray-800">Información del perfil</p>
-              <button
-                onClick={() => setShowEdit(!showEdit)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700"
-                title="Editar perfil"
-              >
-                <FaPen size={14} />
-              </button>
-            </div>
-
-            {showEdit && (
-              <div className="space-y-4 transition-all duration-300">
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm">Nombre completo</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    defaultValue={userData?.name || userData?.full_name || ""}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    defaultValue={userData?.email || ""}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm">Teléfono</label>
-                  <input
-                    type="tel"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    defaultValue={userData?.phone || ""}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm">Profesión</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    defaultValue={userData?.profession || "Abogado"}
-                  />
-                </div>
-                <button className="bg-black text-white w-full py-2 rounded-lg hover:bg-gray-800 text-sm">
-                  Actualizar perfil
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        </main>
       </div>
+
+      <BottomNav />
     </div>
   );
 };
 
 export default ProfileSettings;
+
+// Botón con íconos de react-icons
+const IconBtn = ({ icon }: { icon: JSX.Element }) => (
+  <div className="w-10 h-10 sm:w-12 sm:h-12 border border-gray-300 rounded-full flex items-center justify-center text-black hover:bg-gray-100 transition">
+    {icon}
+  </div>
+);
+
+// Botón con imagen web (Uber, etc.)
+const IconBtnImg = ({ url, alt }: { url: string; alt: string }) => (
+  <div className="w-10 h-10 sm:w-12 sm:h-12 border border-gray-300 rounded-full flex items-center justify-center bg-white hover:bg-gray-100 transition">
+    <img src={url} alt={alt} className="w-5 h-5 object-contain" />
+  </div>
+);

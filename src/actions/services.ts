@@ -150,3 +150,17 @@ export const getServiceById = async (serviceId: number): Promise<Service> => {
     throw error;
   }
 }; 
+
+
+export interface ServiceWithBusiness extends Service {
+  name: string;
+  thumbnail: string;
+  status: string;
+  bookings: number;
+  provider: {
+    name: string;
+    image: string;
+    rating: number;
+    reviews: number;
+  };
+}

@@ -6,7 +6,6 @@ import "../index.css";
 import Header from "../components/Header";
 import Modal from "../components/Modal";
 import BottomNav from "../components/BottomNav";
-
 interface ServiceWithBusiness {
   id: string;
   service_name: string;

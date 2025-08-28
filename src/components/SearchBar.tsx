@@ -1,15 +1,8 @@
-import { Search } from "lucide-react";
-
-interface SearchBarProps {
-  placeholder?: string;
-  onSearch: (query: string) => void;
-  className?: string;
-}
-
 export const SearchBar = ({ 
   placeholder = "Buscar...", 
   onSearch,
-  className = "" 
+  className = "",
+  value = "" // ✅ desestructurado con valor por defecto
 }: SearchBarProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearch(e.target.value);
@@ -22,9 +15,13 @@ export const SearchBar = ({
           type="text"
           placeholder={placeholder}
           onChange={handleChange}
+          value={value} // ✅ ahora sí funciona
           className="w-full px-4 py-3 pl-12 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-300"
         />
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" size={20} />
+        <Search
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-gray-600 transition-colors duration-200"
+          size={20}
+        />
       </div>
     </div>
   );

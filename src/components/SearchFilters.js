@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Search } from "lucide-react";
+export function SearchFilters({ onSearchChange, onStatusChange, searchValue, statusValue, }) {
+    return (_jsxs("div", { className: "flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-lg border animate-fade-in", children: [_jsxs("div", { className: "relative flex-1", children: [_jsx(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), _jsx("input", { type: "text", placeholder: "Search by service or professional...", value: searchValue, onChange: (e) => onSearchChange(e.target.value), className: "pl-10 border rounded-md w-full px-3 py-2" })] }), _jsxs("select", { value: statusValue, onChange: (e) => onStatusChange(e.target.value), className: "w-full sm:w-[180px] border rounded-md px-3 py-2", children: [_jsx("option", { value: "all", children: "All Status" }), _jsx("option", { value: "completed", children: "Completed" }), _jsx("option", { value: "pending", children: "Pending" }), _jsx("option", { value: "canceled", children: "Canceled" })] })] }));
+}

@@ -1,0 +1,9 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { useState } from "react";
+import { PurchaseStatus } from "./PurchaseStatus";
+import { QRCodeModal } from "./QRCodeModal";
+import { QrCode } from "lucide-react";
+export function PurchaseCard({ purchase }) {
+    const [showQR, setShowQR] = useState(false);
+    return (_jsxs(_Fragment, { children: [_jsx("div", { className: "group bg-white rounded-lg border p-4 transition-all duration-300 hover:shadow-lg animate-fade-up", children: _jsxs("div", { className: "flex flex-col md:flex-row gap-4", children: [_jsx("div", { className: "relative w-full md:w-32 h-32 overflow-hidden rounded-md", children: _jsx("img", { src: purchase.image, alt: purchase.serviceName, className: "object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" }) }), _jsxs("div", { className: "flex-1 space-y-4", children: [_jsxs("div", { children: [_jsx("h3", { className: "font-semibold text-lg text-gray-900", children: purchase.serviceName }), _jsx("p", { className: "text-gray-600", children: purchase.professionalName })] }), _jsxs("div", { className: "flex flex-wrap items-center gap-4", children: [_jsx(PurchaseStatus, { status: purchase.status }), _jsx("span", { className: "text-sm text-gray-500", children: purchase.date }), _jsxs("span", { className: "font-medium text-gray-900", children: ["$", purchase.price.toFixed(2)] })] })] }), _jsx("div", { className: "flex md:flex-col justify-end gap-2 mt-4 md:mt-0", children: _jsxs("button", { onClick: () => setShowQR(true), className: "flex items-center gap-2 transition-colors border px-4 py-2 rounded hover:bg-primary hover:text-white", children: [_jsx(QrCode, { className: "w-4 h-4" }), "View QR"] }) })] }) }), _jsx(QRCodeModal, { isOpen: showQR, onClose: () => setShowQR(false), purchaseId: purchase.id })] }));
+}
